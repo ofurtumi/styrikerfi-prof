@@ -13,7 +13,9 @@ samansafn af verkefnum sem fengu 10
 - [x] verkefni 11
 - [x] verkefni 12 - Sigga
 - [x] verkefni 13 - Sigga og Stefán
+- [x] verkefni 14 - Sigga
 - [x] verkefni 15
+- [x] verkefni 16 - Sigga
 - [x] verkefni 17
 - [x] verkefni 18 - Sverrir
 - [x] verkefni 19
@@ -27,10 +29,7 @@ samansafn af verkefnum sem fengu 10
 - [ ] verkefni 8
 - [ ] verkefni 9
 - [ ] verkefni 10
-- [ ] verkefni 14
-- [ ] verkefni 16
 - [ ] verkefni 20
 - [ ] verkefni 24
 - [ ] verkefni 25
 - [ ] verkefni 26
-
