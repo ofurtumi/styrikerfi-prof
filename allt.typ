@@ -6,6 +6,14 @@
   smallcaps([#it])
 }
 
+#show raw.where(block: true): block.with(
+  width: 100%,
+  fill: luma(230),
+  inset: 8pt, // 100% bad
+  radius: 4pt,
+  breakable: false,
+)
+
 
 #align(center, text(20pt)[
   #text(12pt, [*samansafn verkefna og svara*])\ _TÖL401G - Stýrikerfi_
@@ -140,3 +148,207 @@ schedulerFinished() {
     }
 }
 ```
+eftirfarandi aðferðir og hlutir voru gefnir:
+- `addToTail(pcb, queue)`: Append pcb to the tail of the queue queue.
+- `removeFromHead(queue)`: Remove the element at the head of the queue queue and return this element. If the queue is empty, NULL is returned
+- `findAndRemove(pid, queue)`: Find and return PCB entry with PId pid in the queue queue. Removes that PCB entry from the queue.
+- `interruptsOn()`: Enables all interrupts again. 
+- `sleep()`: Puts the CPU into sleep mode, only an interrupt will wake up the CPU.
+- `switchTo(pcb)`: Restarts the timer of the time slice expiration interrupt and switches to the
+context stored in pcb.
+
+= Stýrikerfis apar (APIs)
+== Windows API
+#question([Finnið hvaða system calls Windows apinn bíður upp á til að búa til og eyða prósessum og lýsið stuttlega nafni, inntaki og högun aðferðanna])
+
+Það eru þrjú *system calls* til að búa til *process* í windows apanum.
++ `CreateProcessA()`
++ `CreateProcessAsUserA()`
++ `CreateProcessAsUserW()`
++ `CreateProcessW()`
+
+Allar þessar aðferðir búa til *process* helsti munurinn á milli þeirra eru réttindin sem veitt eru til þess sem kallar á þær.  
+
+Parametrarnir sem þær taka eru eftirfarandi 
+- `lpApplicationName`: nafn forritsins sem kallar á fallið *(getur verið `Null`)*
+- `lpCommandLine`: skipunin sem á að keyra
+- `lpProcessAttributes`: bendir sem segir til um öryggisreglur fyrir processin
+- `lpThreadAttributes`: bendir sem segir til um öryggisreglur fyrir aðalþráð processins
+- `bInheritHandles`: boolean, segir til um hvort nýji process eigi að erfa frá process sem kallaði á sig
+- `dwCreationFlags`: auka flögg sem stilla uppsetninguna
+- `lpEnvironment`: bendir á svæðið þar sem processinn fær að lifa, ef `Null` lifir á svæði kallfallsins
+- `lpCurrentDirectory`: slóð að working directory
+- `lpStartupInfo`: bendir á upplýsingar um kerfið, monitora ofl.
+- `lpProcessInformation`: bendir á svæði sem fær upplýsingar um nýja processinn
+
+Það eru tvær aðferðir til að fjarlægja process:
++ `TerminateProcess()`
++ `ExitProcess()`
+
+báðar aðferðirnar hafa parameterinn `uExitCode` sem er einfaldlega exit kóði processins þegar hann er fjarlægður  
+`TerminateProcess()` hefur líka `hProcess` sem er handle fyrir þann process sem á að drepa
+
+== Posix API
+#question([Hvaða tvær skipanir innan POSIX kerfa eru sambærilegar skipunum úr Windows apanum til þess að búa til nýjan process])
+
+Í *POSIX* stöðluðu kerfi eru skipanirnar til þess að búa til nýtt process í sameiningu, `fork()` og svo `exec()`. Fork býr til copy af process og exec keyrir hann af stað.
+
+
+= Connection less sockets
+#question([Útbúið lausn fyrir producer / consumer vandamálið í java með _zero capacity buffer_ þ.e. buffer sem ekkert getur geymt. Annað forritið starfar sem producer og sendir gögn, vaxandi heiltölur, á consumer sem tekur við þeim. Hitt forritið skal starfa sem consumer, það tekur við gögnum frá producer og prentar þau út.])
+
+#grid(columns: (1fr, 1fr),
+  gutter: 6pt,
+text(
+  size: 7pt,
+  [**
+  ```java
+import java.net.*;
+import java.io.*;
+
+public class Producer {
+  public static void main(String args[]) {
+    DatagramSocket aSocket = null;
+    try {
+      aSocket = new DatagramSocket(6789); 
+      byte[] buffer = new byte[1000];
+      byte[] out = new byte[1000];
+      int item = 0;
+
+      while (true) {
+        item++;
+        DatagramPacket request = 
+          new DatagramPacket(
+            buffer, 
+            buffer.length
+          );
+        aSocket.receive(request);
+        out = Integer.toString(item).getBytes();
+        DatagramPacket reply = 
+          new DatagramPacket(
+            out, 
+            out.length, 
+            request.getAddress(), 
+            request.getPort()
+          );
+        aSocket.send(reply);
+        System.out.println("item --> " + item);
+      }
+    } catch (SocketException e) {
+      System.out.println("Socket: " + e.getMessage());
+    } catch (IOException e) {
+      System.out.println("IO: " + e.getMessage());
+    } finally {
+    if (aSocket != null) aSocket.close();
+    }
+  }
+}```]),
+text(
+  size: 7pt,
+  [
+```java
+import java.io.*;
+import java.net.*;
+
+public class Consumer {
+  public static void main(String args[]) {  
+    // args[0]: message contents  
+    // args[1]: destination hostname
+    DatagramSocket aSocket = null;
+      try {
+        while (true) {
+          aSocket = new DatagramSocket();
+          byte[] message = args[0].getBytes();
+          InetAddress aHost = 
+            InetAddress.getByName(args[1]);
+          int serverPort = 6789; // fyrirfram ákveðið port
+          DatagramPacket request = 
+            new DatagramPacket(
+              message, 
+              message.length, 
+              aHost, 
+              serverPort
+            );
+          aSocket.send(request);
+          byte[] buffer = new byte[1000];
+          DatagramPacket reply = 
+            new DatagramPacket(buffer, buffer.length);
+          aSocket.receive(reply);
+          System.out.println(
+            "Reply: " + new String(reply.getData())
+          );
+        }
+      } catch (SocketException e) {
+        System.out.println("Socket: " + e.getMessage());
+      } catch (IOException e) {
+        System.out.println("IO: " + e.getMessage());
+      } finally {
+      if (aSocket != null) aSocket.close();
+    }
+  }
+}
+```])
+)
+
+= Connection oriented sockets
+#question([Útfærið Java server sem tekur við streng en túlkar hann sem heiltölu $n$ og framkvæmir síðan endurkvæmt Fibonacci reiknirit til að finna n-tu Fibonacci töluna. Breytið síðan útfærslunni ykkar til að nota marga þræði _(multithreaded)_.]) 
+
+#grid(
+  columns: (1fr, 1fr),
+  gutter: 6pt,
+  text(size: 6pt, 
+    [```java
+import java.net.*;
+import java.io.*;
+
+public class ConnectionOrientedClient {
+  public static void main(String args[]) {
+    // args[0]: message contents, args[1]: destination hostname
+    Socket aSocket = null;
+    try {
+      int serverPort = 7896;
+      aSocket = new Socket(args[1], serverPort);
+      DataInputStream in = 
+        new DataInputStream(aSocket.getInputStream());
+      DataOutputStream out = 
+        new DataOutputStream(aSocket.getOutputStream());
+      out.writeUTF(args[0]); // UTF is a string encoding
+      String data = in.readUTF(); 
+      // read a line of data from the stream
+      System.out.println("Received: " + data);
+    } catch (UnknownHostException e) { 
+      System.out.println("Socket:" + e.getMessage());
+    } catch (EOFException e) { 
+      System.out.println("EOF:" + e.getMessage());
+    } catch (IOException e) { 
+      System.out.println("readline:" + e.getMessage());
+    } finally {
+      if (aSocket != null)
+      try { aSocket.close(); } 
+      catch (IOException e) { 
+        System.out.println("close:" + e.getMessage());
+      }
+    }
+  }
+}```]),
+text(size: 6pt, [```java
+import java.net.*;
+import java.io.*;
+
+public class ConnectionOrientedServer {
+  public static void main(String args[]) {
+  try {
+    int serverPort = 7896; // the server port
+    ServerSocket listenSocket = new ServerSocket(serverPort);
+    while (true) {
+      Socket clientSocket = listenSocket.accept();
+      Connection c = new Connection(clientSocket); // Handle request
+      c.start();
+    }
+  } catch (IOException e) {
+    System.out.println(
+      "Listen socket:" + e.getMessage());
+    }
+  }
+} 
+```]))
