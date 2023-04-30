@@ -1,9 +1,11 @@
 #set heading(numbering: "1.1.a.")
 
 
+
 #show heading: it => {
   smallcaps([#it])
 }
+
 
 #align(center, text(20pt)[
   #text(12pt, [*samansafn verkefna og svara*])\ _TÖL401G - Stýrikerfi_
@@ -32,7 +34,7 @@
   ]
 )
 
-#outline(title: "Yfirlit")
+#outline(title: "Yfirlit", depth: 2)
 
 = Umræða um stýrikerfi
 #question([Ræðið hvort stýrikerfi séu nauðsynleg. Pælið til dæmis í tækjum sem keyra aðeins eitt forrit án nokkurs inntaks frá notanda. Er nauðsynlegt fyrir þessi tæki að hafa stýrikerfi?])
@@ -78,15 +80,63 @@ Flest linux stýrikerfi eru mestmegnis POSIX vottuð, mörg þeirra eru ábyggil
 
 = Hypervisors
 Í báðum verkefnum er verið að skoða _"VM hypervisor"_ sem sér um að keyra tvö stýrikerfi $"OS"_1$ og $"OS"_2$ innan tveggja virtual véla á kerfi með einn kjarna.
-== 
+== Tímastýring
 #question([Verkraðari yfirstýrikerfisins _(scheduler, hypervisor)_ hefur gefið $"OS"_1$ 20ms af CPU tíma. Á meðan $"OS"_1$ er að keyra í sínum gefna tímaramma klárast biðtími $"OS"_2$ og það stýrikerfi lætur sinn CPU verkraða vita. Lýsið tveimur möguleikum fyrir yfirstýrikerfið til að takast á þessu.]) 
 
 Ein lausn væri fyrirbyggjandi plönun _(preemptive scheduling)_. Hver hlutur fær að keyra í ákveðin tíma, og eftir það er tekinn í burtu og settur í röð. Þannig gæti yfirstýrikerfið truflað keyrslu á $"OS"_1$ og farið að keyra $"OS"_2$.
 
 Önnur lausn væri að tímastýra kerfunum _(time-sharing)_. Þá leyfir yfirstýrikerfið $"OS"_1$ að keyra í 20ms, en minnkar tíma sem það fær í næsta tímaramma til að bæta upp fyrir tímann sem $"OS"_2$ missti.
 
-== 
+== Sýndarvélar
 #question([Þegar verið er að vinna með sýndarvélar eru sýndarvélarnar ótengdar hvor annari. $"OS"_1$ keyrandi á vél $"VM"_1$ getur ekki nálgast skráarkerfi ytri vélarinnar né skránna á kerfi $"OS"_2$ keyrandi á $"VM"_2$. Lýsið mögulegri aðferð til að veita vélunum möguleika á að deila skrám])
 
-Það er mögulegt fyrir fleiri en eina sýndarvél að deila skrárkerfis-staðsetningu _(file-system volume)_ sem gerir þeim kleyft að deila skrám.
+Það er mögulegt fyrir fleiri en eina sýndarvél að deila skrárkerfis-staðsetningu _(file-system volume)_ sem gerir þessum sýndarvélum kleyft að deila skrám. 
 
+= Boot Process
+#question([Lýsið skrefunum í uppstyllingu kerfisins _(boot process)_ alveg þangað til að innskráningar gluggi stýrikerfisins birtist. Leggið áherslu á hvað gerist þegar innra ræsiforritið _(bootstrap)_ hefur komið kjarna _(kernel)_ inn í RAM])
+
+Við getum gert ráð fyrir því að búið sé að hlaða kernel inn í minni eftir skref tvö á bootloader ferlinu. Í hausnum á kernel myndinni er örlítill kóði sem setur upp lágmarks tengingu við vélbúnaðinn, þetta gerir vélinni kleift að uncompressa kernelinn og setja hann í high memory. 
+
+Eftir að búið er að klára vinnslu á kernel, er skráarkerfið fest sem leyfir kernelinu að sjá og nálgast nauðsynlegar skrár. Eftir það er keyrt frumstyllingarforrit sem setur upp kerfiseiningar, net, skráarkerfi og þessháttar. Að lokum keyrir frumstylliforritið upp notendaviðmótið á samt fleiri kerfiseiningum. Þegar öll þessi skref eru klárað er process 1 keyrt upp.
+
+= Scheduler
+#question([Útfærðu scheduler aðferð sem tekst á eftirfarandi aðstæðum:
+  - Timer interrupt - Aðferðin fær merki um að tímarammi hafi klárast
+  - I/O syscall - Aðferð sem er að keyra biður um *I/O*
+  - I/O interrupt - Tæki lætur vita að *I/O* hafi klárast])
+
+```java
+// kóðinn sem var gefinn
+schedulerUnfinished() {
+  if (called by timer interrupt) { 
+    // Time slice of current process expired 
+   } else if (called by I/O system call) { 
+    // I/O request by current process 
+  } else if (called by I/O interrupt) { 
+    // I/O of process ioCompleted completed 
+  }
+
+  // Further code outside if statements (if required)
+}
+
+// kóðinn sem var skilað
+schedulerFinished() {
+    if (called by timer interrupt) { // Time slice of current process expired  
+        addToTail(running, ready);
+    } else if (called by I/O system call) { // I/O request by current process 
+        addToTail(running, waiting);
+    } else if (called by I/O interrupt) { // I/O of process ioCompleted completed 
+        addToTail(running, waiting);
+        findAndRemove(ioCompleted, waiting);
+    }
+
+    // Further code outside if statements (if required)
+    interruptOn()
+    if (ready == null) {
+        sleep()
+    } else {
+        running = removeFromHead(ready);
+        switchTo(running)
+    }
+}
+```
