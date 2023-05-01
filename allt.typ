@@ -471,9 +471,61 @@ public class MyAssignment11 extends Thread {
       ++in;
     }
   }
-
 }
 ```
 == Gildi sem á að koma
 #question([Hvert er gildið sem á að prentast út í lokin og hvernig er hægt að sjá að race condition hafi átt sér stað?])
 Gildið sem í fullkomnum heimi ætti að koma út væri $2 dot.op n$ en við getum séð að það hafi komið upp race condition ef prentaða gildið er minna en $2n$. Þetta gerist vegna þess að báðir þræðirnir reyna að taka *`in`* frá á sama tíma og hækka það, en bara annar þráðurinn fær að vista breytinguna.
+
+= Peterson reikniritið
+#question([Notið kóðann úr verkefni 11 og breytið þannig að það noti útfærslu Peterson's reikniritsisn og komið þannig í veg fyrir race conditions])
+
+#text(size: 9pt, [
+```java
+public class MyAssignment12 extends Thread {
+  public static volatile long in; 
+  private static long n; 
+  private int id;
+  public static volatile boolean[] flag = {false,false};
+  public static volatile int turn; 
+
+  public MyAssignment12 (long _n, int _id) {
+    n = _n; 
+    in = 0;
+    id = _id;
+  }
+
+
+  public static long main(long iterationsPerThread) {
+    Thread t1 = new MyAssignment12(iterationsPerThread, 0);
+    Thread t2 = new MyAssignment12(iterationsPerThread, 1); 
+
+    t1.start();
+    t2.start();
+
+    try {
+      t1.join();
+      t2.join();
+    } catch (InterruptedException ie) {
+      System.out.println("Interrupted while waiting thread");
+    }
+    return in;
+  }
+
+  public void run() {
+    for (int i = 1; i <= myIteration; i++){
+      increment();
+    }
+  }
+
+  public void increment() {
+    flag[id] = true;
+    turn = 1-id; 
+    while(flag[1-id] && turn==1-id) { /* waiting for turn */ }
+    long next_free_slot = in;
+    next_free_slot ++;
+    in = next_free_slot;
+    flag[id] = false;
+  }
+}
+```])
