@@ -352,3 +352,52 @@ public class ConnectionOrientedServer {
   }
 } 
 ```]))
+
+= Scheduling reiknirit
+Skoðið eftirfarandi töflu og / eða mynd:
+#table(
+  columns: (3fr, 1fr, 1fr, 1fr, 1fr, 1fr),
+  [Process], [P1], [P2], [P3], [P4],[p5],
+  [Arrival time], [0],[2],[3],[14],[18],
+  [Service time], [4],[11],[8],[5],[4],
+  [Priority], [mid],[low],[high],[mid],[high]
+)
+#align(center, image("imgs/scheduling.png"))
+
+== Raðið ferlum eftir reikniritum og reiknið tíma
+- Þjónustutími _(residance time)_ fyri feril er reiknaður sem: 
+  - $"completion time" - "arrival time"$ 
+  - $"waiting time" + "service time"$
+- Biðtími _(waiting time)_ fyrir feril er reiknaður sem: 
+  - $"residance time - service time"$
+
+=== FCFS (first come first served)
+Hér er klárað ferla í þeirri röð sem þeir koma inn. Ferlar eru geymdir í einhverskonar biðröð þar sem næsti í röðinni er tekinn út eftir að sá á undan klárar.
+#image("imgs/fcfs.png")
+- Meðalþjónustutími = $(4-0 + 15-2 + 23-3 + 28-14 + 32-18)/5 = 13$
+- Meðalbiðtími = $(0+ 4-2 + 15-3 + 23-14 + 28-18)/5 = 6.6$
+
+=== SJF (shortest job first)
+Hér er svipað og FCFS við höfum biðröð þar sem valið er úr eftir að núverandi ferill klárar, nema núna veljum við minnsta feril sem er í biðröðinni og klárum hann.
+#image("imgs/sjf.png")
+- Meðalþjónustutími = $(4 + 23-2 + 12-3 + 32-14 + 27-18)/5 = (4+ 21+ 9+ 18+ 9)/5 = 12.2$
+- Meðalbiðtími = $(0 + 12-2 + 4-3 + 27-14 + 23-18)/5 = (0+10+1+13+5)/5 = 5.8$
+
+=== SRTF (shortest remaining time first)
+Hérna höfum við biðröðina okkar nema hvað við bíðum ekki endilega eftir því að fyrri ferill hafi klárað til að byrja á nýjum ferli. Þegar nýr ferill kemur inn þá athugum við hvort hann sé með styttri vinnslutíma og ef svo er geymum við núverandi feril og byrjum þennan nýja.
+#image("imgs/srtf.png")
+- Meðalþjónustutími = $(4 + 32-2 + 12-3 + 19-14 + 23-18) / 5 = (4+30+9+5+5)/5 = 10.6$
+- Meðalbiðtími = $(0 + 30-11 + 9-8 + 5-5 + 5-4) / 5 = (0+19+1+0+1) / 5 = 4.2$
+
+=== RR (round robin)
+Round robin notast við fyrirfram skilgreindan _"time quantum "_ sem í þessu tilfelli er $4$. Það þýðir að hver ferill fær að vinna í $4$ einingar af tíma og þá er næsti ferill í biðröðinni valinn. Þetta er endurtekið þar til allir ferlar eru kláraðir.
+#image("imgs/rr.png")
+- Meðalþjónustutími = $(4 + 27-2 + 20-3 + 32-14 + 31-18) / 5 = (4+25+17+18+13)/5 = 15.4$
+- Meðalbiðtími = $(0 + 25-11 + 17-8 + 18-5 + 13-4) / 5 = (0+14+9+13+9)/5 = 9$
+
+=== RR-prio (round robin with priority)
+Svipaðar pælingar og með round robin nema hvað við skiptum ferlum upp í mismunandi biðraðir eftir forgangi, sjá í töflunni _"priority"_ fyrir hvern feril. Þegar tíminn _"time quantum"_ er liðinn veljum við næst þá biðröð sem hefur hæstan forgang og vinnum með hana þangað til allir hennar ferlar hafa klárað.
+#image("imgs/rrprio.png")
+- Meðalþjónustutími = $(4 + 32-2 + 12-3 + 25-14 + 24-18)/5 = (4+30+11+9+6)/5 = 12$
+- Meðalbiðtími = $(0 + 30-11 + 11-8 + 9-5 + 6-4)/5 = (0+19+3+4+2)/5 = 5.6$
+
