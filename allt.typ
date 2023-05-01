@@ -105,7 +105,7 @@ Ein lausn væri fyrirbyggjandi plönun _(preemptive scheduling)_. Hver hlutur f�
 
 Við getum gert ráð fyrir því að búið sé að hlaða kernel inn í minni eftir skref tvö á bootloader ferlinu. Í hausnum á kernel myndinni er örlítill kóði sem setur upp lágmarks tengingu við vélbúnaðinn, þetta gerir vélinni kleift að uncompressa kernelinn og setja hann í high memory. 
 
-Eftir að búið er að klára vinnslu á kernel, er skráarkerfið fest sem leyfir kernelinu að sjá og nálgast nauðsynlegar skrár. Eftir það er keyrt frumstyllingarforrit sem setur upp kerfiseiningar, net, skráarkerfi og þessháttar. Að lokum keyrir frumstylliforritið upp notendaviðmótið á samt fleiri kerfiseiningum. Þegar öll þessi skref eru klárað er process 1 keyrt upp.
+Eftir að búið er að klára vinnslu á kernel, er skráarkerfið fest sem leyfir kernelinu að sjá og nálgast nauðsynlegar skrár. Eftir það er keyrt frumstyllingarforrit sem setur upp kerfiseiningar, net, skráarkerfi og þessháttar. Að lokum keyrir frumstylliforritið upp notendaviðmótið á samt fleiri kerfiseiningum. Þegar öll þessi skref eru klárað er ferill 1 keyrt upp.
 
 = Scheduler
 #question([Útfærðu scheduler aðferð sem tekst á eftirfarandi aðstæðum:
@@ -167,7 +167,7 @@ context stored in pcb.
 + `CreateProcessAsUserW()`
 + `CreateProcessW()`
 
-Allar þessar aðferðir búa til *process* helsti munurinn á milli þeirra eru réttindin sem veitt eru til þess sem kallar á þær.  
+Allar þessar aðferðir búa til feril helsti munurinn á milli þeirra eru réttindin sem veitt eru til þess sem kallar á þær.  
 
 Parametrarnir sem þær taka eru eftirfarandi 
 - `lpApplicationName`: nafn forritsins sem kallar á fallið *(getur verið `Null`)*
@@ -185,13 +185,13 @@ Parametrarnir sem þær taka eru eftirfarandi
 + `TerminateProcess()`
 + `ExitProcess()`
 
-báðar aðferðirnar hafa parameterinn `uExitCode` sem er einfaldlega exit kóði processins þegar hann er fjarlægður  
-`TerminateProcess()` hefur líka `hProcess` sem er handle fyrir þann process sem á að drepa
+báðar aðferðirnar hafa parameterinn `uExitCode` sem er einfaldlega exit kóði ferilsins þegar hann er fjarlægður  
+`TerminateProcess()` hefur líka `hProcess` sem er handle fyrir þann feril sem á að drepa
 
 == Posix API
-#question([Hvaða tvær skipanir innan POSIX kerfa eru sambærilegar skipunum úr Windows apanum til þess að búa til nýjan process])
+#question([Hvaða tvær skipanir innan POSIX kerfa eru sambærilegar skipunum úr Windows apanum til þess að búa til nýjan feril])
 
-Í *POSIX* stöðluðu kerfi eru skipanirnar til þess að búa til nýtt process í sameiningu, `fork()` og svo `exec()`. Fork býr til copy af process og exec keyrir hann af stað.
+Í *POSIX* stöðluðu kerfi eru skipanirnar til þess að búa til nýtt feril í sameiningu, `fork()` og svo `exec()`. Fork býr til copy af feril og exec keyrir hann af stað.
 
 
 = Connection less sockets
@@ -388,7 +388,7 @@ Hérna höfum við biðröðina okkar nema hvað við bíðum ekki endilega efti
 #image("imgs/srtf.png")
 - Meðalþjónustutími = $(4 + 32-2 + 12-3 + 19-14 + 23-18) / 5 = (4+30+9+5+5)/5 = 10.6$
 - Meðalbiðtími = $(0 + 30-11 + 9-8 + 5-5 + 5-4) / 5 = (0+19+1+0+1) / 5 = 4.2$
-
+ 
 === RR (round robin)
 Round robin notast við fyrirfram skilgreindan _"time quantum "_ sem í þessu tilfelli er $4$. Það þýðir að hver ferill fær að vinna í $4$ einingar af tíma og þá er næsti ferill í biðröðinni valinn. Þetta er endurtekið þar til allir ferlar eru kláraðir.
 #image("imgs/rr.png")
@@ -401,3 +401,34 @@ Svipaðar pælingar og með round robin nema hvað við skiptum ferlum upp í mi
 - Meðalþjónustutími = $(4 + 32-2 + 12-3 + 25-14 + 24-18)/5 = (4+30+11+9+6)/5 = 12$
 - Meðalbiðtími = $(0 + 30-11 + 11-8 + 9-5 + 6-4)/5 = (0+19+3+4+2)/5 = 5.6$
 
+== Hversvegna er ómögulegt fyrir tvo ferla að klára á sama tíma?
+Nýr process er búinn til með kalli á CreateProcess í windows eða Fork á Posix kerfi á meðan annar process keyrir. Á kerfi með aðeins einn gjörva (processor system) má aðeins kalla einu sinni á þessar aðferðir og engir tveir processar geta komið á sama tíma 
+
+= Ferlaröðun
+== Raðið eftir reglum
+#grid(
+  columns: (3fr, 4fr),
+  gutter: 6pt,
+
+question([
+Raðið ferlum *[P1, P2, P3]* með Round Robin þar sem time quantum er 4.
+
+*Reglur:*
+
+arr(t): Tímapunktur þegar ferill kemur inn, fylgir x í (x, y) tímapunkti
+
+cpu_io($d_"cpu", d_"io"$): Ferill vinnur í $d_"cpu"$ tíma og bíður svo í $d_"io"$ eftir að klára
+
+cpu(d): Ferill vinnur í $d$ tíma og hættir
+
+*Gildi ferla:*
+- P1: arr(0), cpu_io(1, 2), cpu_io(2, 3), cpu(5)
+- P2: arr(2), cpu_io(5, 2), cpu(1)
+- P3: arr(4), cpu_io(1, 1), cpu(2)
+]),
+image("imgs/roundandqueue.png")
+)
+
+== Reiknið meðalþjónustutíma
+Þjónustutími fyrir hvern feril er lokatími - upphafstími, meðaltíminn verður því:
+$ (19-0 + 18-2 + 17-4) / 3 = (19 + 16 + 13) / 3 = 16 $
