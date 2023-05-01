@@ -689,4 +689,77 @@ public class Counter {
 }
 ```
 
+= Meiri semaphores
+#question([Jói bakari vill betrumbæta bollu-bökunar ferlið í bakaríinu sínu með því að nota nýtt samhliða bakara-ferli _(parallel baker processes)_ sem nýtir sér semaphores til að stilla saman bakara. Ferlið hljómar svona: 
+- Einn yfirbakari skaffar þremur undirbökurum vinnu og hráefnum
+- Hver undirbakari framleiðir endalaust af bollum úr þremur hráefnum
+- Hver undirbakari hefur endalaust magn af einu hráefni en vantar hin tvö til að baka bollu
+- Yfirbakarinn hefur skaffar endalaust handahófskennd pör af hráefnum til undirbakarana
+- Undirbakarinn sem á það hráefni sem vantar
+  + Tekur við parinu
+  + Lætur vita að hann hafi tekið parið
+  + Býr til bollu
+])
 
+#grid(
+columns: (1fr, 1fr),
+gutter: 6pt,
+```java
+Semaphore on_table = new Semaphore(0);
+Semaphore offer_plain = new Semaphore(0);
+Semaphore offer_cream = new Semaphore(0);
+Semaphore offer_choco = new Semaphore(0);
+
+// master:
+while(true) {
+  int choice = random(1,3)
+  switch(choice) {
+    case 1: 
+      offer(cream, choco);
+      offer_plain.signal();
+      break;
+
+    case 2: 
+      offer(choco, plain);
+      offer_cream.signal();
+      break;
+
+    case 3: 
+      offer(plain, cream);
+      offer_choco.signal();
+      break;
+  }
+    
+  on_table.wait();
+}
+```,
+```java
+// Assistants:
+// ass-cream:
+while(true) {
+  offer_cream.wait();
+  ingredients = fetch();
+  on_table.signal();
+
+  assemble(ingredients, cream)
+}
+
+// ass-choco:
+while(true) {
+  offer_choco.wait();
+  ingredients = fetch();
+  on_table.signal();
+    
+  assemble(ingredients, choco)
+}
+
+// ass-plain:
+while(true) {
+  offer_plain.wait();
+  ingredients = fetch();
+  on_table.signal();
+
+  assemble(ingredients, plain)
+}
+```
+)
