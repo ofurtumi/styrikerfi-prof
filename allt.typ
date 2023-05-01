@@ -432,3 +432,48 @@ image("imgs/roundandqueue.png")
 == Reiknið meðalþjónustutíma
 Þjónustutími fyrir hvern feril er lokatími - upphafstími, meðaltíminn verður því:
 $ (19-0 + 18-2 + 17-4) / 3 = (19 + 16 + 13) / 3 = 16 $
+
+= Þræðir og race condition
+== Útfærsla á race condition
+#question([Útfærið forrit í java sem býr til tvo nýja þræði sem eru í race condition. Þræðirnir eiga að hækka breytu *`in`* um 1 innan lykkju sem keyrir n sinnum þar sem n er heiltala tekin inn af skipanalínu. Þar sem *`in`* breytan er volitile getur komið upp race condition og líklegra eftir því sem n er stærra.])
+
+```java
+public class MyAssignment11 extends Thread {
+  private static volatile long in; // línan sem leyfir þráðum að deila breytu
+  private long iterations;
+
+  MyAssignment11(long _in) {
+    iterations = _in;
+  } // iterations jafngildir n
+
+  public static long main(long iterationsPerThread) { // Do not modify this line!
+    MyAssignment11 t1 = new MyAssignment11(iterationsPerThread);
+    MyAssignment11 t2 = new MyAssignment11(iterationsPerThread);
+
+    // báðir þræðirnir keyra sitthvort run() samhlið
+    t1.start(); 
+    t2.start();
+
+    // join() sameinar þræði aftur inn í main þráðin
+    try {
+      t1.join();
+      t2.join();
+    } catch (Exception e) {
+      System.out.println(e);
+    }
+
+    return in;
+  }
+
+  @Override
+  public void run() {
+    for (long i = 0; i < iterations; i++) {
+      ++in;
+    }
+  }
+
+}
+```
+== Gildi sem á að koma
+#question([Hvert er gildið sem á að prentast út í lokin og hvernig er hægt að sjá að race condition hafi átt sér stað?])
+Gildið sem í fullkomnum heimi ætti að koma út væri $2 dot.op n$ en við getum séð að það hafi komið upp race condition ef prentaða gildið er minna en $2n$. Þetta gerist vegna þess að báðir þræðirnir reyna að taka *`in`* frá á sama tíma og hækka það, en bara annar þráðurinn fær að vista breytinguna.
