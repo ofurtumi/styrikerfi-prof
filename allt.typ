@@ -1,10 +1,5 @@
 #set heading(numbering: "1.1.a.")
 
-#show heading: it => {
-  if it.level == 1 and it.body != "Yfirlit" [#pagebreak()]
-  smallcaps([#it])
-}
-
 #show raw.where(block: true): it => {
   block(
     width: 100%,
@@ -45,6 +40,11 @@
 )
 
 #outline(title: "Yfirlit", depth: 2)
+
+#show heading: it => {
+  if it.level == 1 and it.body != "Yfirlit" [#pagebreak()]
+  smallcaps([#it])
+}
 
 = Umræða um stýrikerfi
 #question([Ræðið hvort stýrikerfi séu nauðsynleg. Pælið til dæmis í tækjum sem keyra aðeins eitt forrit án nokkurs inntaks frá notanda. Er nauðsynlegt fyrir þessi tæki að hafa stýrikerfi?])
@@ -859,3 +859,72 @@ public class MyAssignment16 extends Thread {
   }
 }
 ```
+
+= Deadlock prevention
+#question([Við höfum 5 heimspekinga sem haga sér allir svipað, þeir sitja allir í hring með prjóna báðum megin við sig. Það eru þannig 5 prjónar í heildina. Hver heimspekingur hugsar í smá tíma og bíður þangað til að prjónninn hægra megin við hann er laus og tekur hann upp, síðan bíður hann eftir því að prjónninn á vinstri hönd sé laus áður en hann getur borðað.])
+== Rétthentu heimspekingarnir
+Fyrst hugsum við um heimspekinga sem haga sér allir eins  
+
+Við getum séð strax að ef allir grípa sinn hægri prjón þá endum við með **deadlock** vegna þess að enginn getur fengið vinstri prjóninn sem þeir þurfa til að borða  
+- Þetta er dæmi um **circular wait**  
+- Þetta er líka dæmi um **no preemtion** þar sem heimspekingarnir geta ekki skilað prjónum fyrr en eftir að þeir borða  
+- Það má líka sjá **hold and wait** þar sem hluturinn sem heimspekingarnir þurfa eru í notkun af öðrum heimspekingum  
+- Þar sem að aðeins einn heimspekingur getur haldið á hverjum prjóni í einu þá er þetta líka **mutual exclusion**  
+
+Ef heimspekingarnir myndu sýna einhverja mannasiði og taka tillit til hægri handar nágranna síns þá myndi þetta hugsanlega ganga upp en þar sem dæmið uppfyllir öll fjögur **deadlock** skilyrðin þá má segja að þetta endi í **deadlock**
+
+== Örvhenti félaginn
+Nú hugsum við um alla eins nema einn örvhentan
+
+Gerum ráð fyrir því að þeir hagi sér eins og í fyrra dæminu, núna grípa þeir allir prjóninn sér á hægri hönd nema sá örvhenti, hann reynir að grípa prjóninn sér á vinstri hönd en nágranni hans er nú þegar búinn að grípa hann  
+Þetta eru góðar fréttir fyrir vinstri nágranna örvhenta heimspekingsins því nú getur hann tekið sinn vinstri prjón og fengið sér að borða  
+Þegar nágranninn klárar skilar hann prjónunum sínum og vinstri rétthenti nágranni hans borðar og setur af stað keðju
+Þessi keðja endar þegar örvhenti nær loksins að fá vinstri prjón og allir geta borðað húrra :)
+
+Það að hafa örvhenta heimspekingin kemur alltaf í veg fyrir **deadlock**
+
+= Deadlock Algorithms
+#question([Við fáum gefið þrjá ferla $[P_1, P_2, P_3]$ sem nota í sameiningu tvær auðlindir $R_1$ og $R_2$. Báðar $R_i$ breyturnar hafa $9$ stök í kerfinu til nýtingar. Hámarksnýting fyrir ferla $[P_1, P_2, P_3]$ er skilgreind á forminu $P_i=(M_1, M_2)$, þar sem ferill $X_i$ notar að hámarki $M_1$ af $R_1$ osfr. $A=(6,3), B=(8,2), C=(4,1)$ 
+
+Í upphafi eru allar auðlindir nothæfar en síðan taka ferlarnir frá eftirfarandi auðlindir: $P_1(2,1), P_2(3,1), P_3(2,1)$
+
+Við endum þá með nýtingarfylki _(allocation matrix)_, auðlindarvektor _(avail. resource vec.)_ og beiðnafylki _(request matrix)_:
+$  C = mat(2,1;3,1;2,1), A = mat(2, 6), R = mat(4,2; 5,1; 2,0) $])
+
+== Safety reikniritið
+#question([Notið safety reikniritið til að athuga hvort þessi staða leiðir til deadlocks])
+
+Finnið feril þar sem hámarksnýting - núverandi nýting er minni eða jöfn því sem auðlindafylkið hefur upp á að bjóða
+
+$C$ hefur $"max"=(4,1)$ og $"nýtingu"=(2,1)$ og þar sem $(4-2, 1-1) = (2,0) <= (2,6)$ þá getum við merkt $C$ sem *klárað* og tekið auðlindir þess inn í auðlindafylkið. Skoðum núna fylkin okkar:
+$ C=mat(2,1;3,1;0,0), A=mat(4,7), R=mat(4,2;5,1;0,0) $
+
+Gerum nú það sama fyrir það sem eftir er af nýtingarfylkinu:
+$A_"max" - A_(bb(C)) = (4, 2) <= (4,7)$, merkjum því $A$ sem klárað og tökum auðlindirnar
+$ C=mat(0,0;3,1;0,0), A=mat(6,8), R=mat(0,0;5,1;0,0) $
+
+Reynum að klára með því að gera líka við $B$: $B_"max" - B_(bb(C)) = (5, 1) <= (6, 8)$ við getum því klárað $B$ og sagt með fullvissu að þessi staða endi ekki í deadlock, lokastaða: 
+$ C=mat(0,0;0,0;0,0), A=mat(9,9), R=mat(0,0;0,0;0,0) $
+
+#pagebreak()
+== Bankers reikniritið
+#question([Höldum áfram með upphafsstöðuna hér fyrir ofan nema breytum aðeins $P_1$ vill sleppa einum úr $R_1$ og $P_2$ vill svo fá tvo af $R_1$ í staðin, ef báðar af þessum beiðnum eru samþykktar þá endum við með upphafsstöðu sem lítur svona út:
+$ C=mat(1,1;5,1;2,1), A=mat(1,6), R=mat(5,2; 3, 1; 2,1) $
+Notið núna bankers reikniritið til þess að ákvarða hvort það eigi að veita þessar beiðnir])
+
+Bankers reikniritið snýst um að skoða beiðnir og athuga hvort, ef samþykktar, staðan sem endar verði örugg með því að keyra safety reikniritið eins og fyrir ofan.
+
+Við sjáum hér strax að ef við samþykkjum beiðni $P_2$ þá endum við strax í deadlock þar sem við getum ekki uppfyllt neinar kröfur í $R$
+
+Hinsvegar ef við skoðum fylkin þar sem við samþykktum bara beiðni $P_1$:
+$ C=mat(1,1;3,1;2,1), A=mat(3,6), R=mat(5,2; 5,1; 2,1) $
+Núna, eftir að við klárum $P_3$ getum við klárað bæði $P_1$ og $P_2$. Niðurstaðan er því að samþykkja beiðnina frá $P_1$ og geyma beiðnina frá $P_2$. Niðurstaðan er því að samþykkja beiðnina frá $P_1$ og geyma beiðnina frá $P_2$.
+
+== Bankers aftur?
+#([Endurtökum síðasta verkefni nema rétt eftir að við höfnum $P_2$ þá hættir $P_3$ og skilar öllum sínum auðlindum. Þá þarf að keyra bankers fyrir beiðni $P_2$ aftur, virkar það í þetta skipti?])
+
+Upphafsstaðan okkar er þá núna: 
+$ C=mat(1,1;5,1;0,0), A=mat(5,7), R=mat(5,2;3,1;0,0) $
+
+Nú vinna auðlindirnar úr $P_3$ á móti því sem $P_2$ bað um og við getum klárað bæði $P_1$ og $P_2$ þannig þessi staða er ekki deadlock og við getum samþykkt beiðnina.
+
