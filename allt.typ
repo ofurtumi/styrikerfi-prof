@@ -1,23 +1,20 @@
 #set heading(numbering: "1.1.a.")
 
 #show heading: it => {
-  if it.level == 1 [
-    #pagebreak()
-    ]
+  if it.level == 1 and it.body != "Yfirlit" [#pagebreak()]
   smallcaps([#it])
 }
 
 #show raw.where(block: true): it => {
   block(
-  width: 100%,
-  fill: luma(230),
-  inset: 8pt, // 100% bad
-  radius: 4pt,
-  breakable: false,
-  text(size: 7pt, [#it])
-)
+    width: 100%,
+    fill: luma(230),
+    inset: 8pt, // 100% bad
+    radius: 4pt,
+    breakable: false,
+    text(size: 7pt, [#it])
+  )
 }
-
 
 
 #align(center, text(20pt)[
@@ -761,5 +758,104 @@ while(true) {
 
   assemble(ingredients, plain)
 }
+```)
+
+= Monitor-semahpores
+#grid(
+columns: (1fr, 1fr),
+gutter: 6pt,
+[#question([Útfærið ykkar eigin semaphores, í stað innbyggðu java semaphora, með því að nota *Monitor* hugmyndarfræðina. Notið þá svo til að uppfæra verkefni 11 / 12])
+```java
+public class Counter {
+  private volatile long in = 0;
+
+  private MonitorSemaphore myMonSem = 
+    new MonitorSemaphore(1);
+
+  public void increment() {
+    long next_free_slot;
+
+    myMonSem.op1MyWait();
+
+    next_free_slot = in;
+    next_free_slot = next_free_slot + 1;
+    in = next_free_slot;
+
+    myMonSem.op2MySignal();
+  }
+
+  public long getIn() {
+    return in;
+  }
+}
+```],
+```java
+public class MonitorSemaphore {
+  private volatile int count;
+
+  public MonitorSemaphore(int init) {
+    count = init;
+  }
+
+  public synchronized void op1MyWait() {
+    count = count - 1;
+    try {
+      if (count < 0) {
+        this.wait();
+      }
+    } catch (Exception e) {
+      // Error
+    }
+  }
+
+  public synchronized void op2MySignal() {
+    count = count + 1;
+    try {
+      if (count <= 0) {
+        this.notify();
+      }
+    } catch (Exception e) {
+      // Error
+      
+    }
+  }
+}
+```)
+
+```java
+public class MyAssignment16 extends Thread {
+  private long theNumberOfIterations;
+  private Counter theCounter;
+
+  public MyAssignment16(Counter counter, long iterationsPerThread) {
+    theCounter = counter;
+    theNumberOfIterations = iterationsPerThread;
+  }
+
+  public void run() {
+    for (long i = 0; i < theNumberOfIterations; ++i) {
+      System.err.print(this.getName());
+      theCounter.increment();
+    }
+  }
+
+  public static long main(long iterationsPerThread) {
+    Counter counter = new Counter();
+    MyAssignment16 raceDemo0 = new MyAssignment16(counter, iterationsPerThread);
+    MyAssignment16 raceDemo1 = new MyAssignment16(counter, iterationsPerThread);
+    raceDemo0.setName("0");
+    raceDemo1.setName("1");
+
+    raceDemo0.start();
+    raceDemo1.start();
+    try {
+      raceDemo0.join();
+      raceDemo1.join();
+    } catch (InterruptedException e) {
+      e.printStackTrace();
+    }
+
+    return counter.getIn();
+  }
+}
 ```
-)
