@@ -1,18 +1,23 @@
 #set heading(numbering: "1.1.a.")
 
-
-
 #show heading: it => {
+  if it.level == 1 [
+    #pagebreak()
+    ]
   smallcaps([#it])
 }
 
-#show raw.where(block: true): block.with(
+#show raw.where(block: true): it => {
+  block(
   width: 100%,
   fill: luma(230),
   inset: 8pt, // 100% bad
   radius: 4pt,
   breakable: false,
+  text(size: 7pt, [#it])
 )
+}
+
 
 
 #align(center, text(20pt)[
@@ -197,18 +202,17 @@ báðar aðferðirnar hafa parameterinn `uExitCode` sem er einfaldlega exit kó�
 = Connection less sockets
 #question([Útbúið lausn fyrir producer / consumer vandamálið í java með _zero capacity buffer_ þ.e. buffer sem ekkert getur geymt. Annað forritið starfar sem producer og sendir gögn, vaxandi heiltölur, á consumer sem tekur við þeim. Hitt forritið skal starfa sem consumer, það tekur við gögnum frá producer og prentar þau út.])
 
-#grid(columns: (1fr, 1fr),
-  gutter: 6pt,
-text(
-  size: 7pt,
-  [**
-  ```java
+#grid(
+columns: (1fr, 1fr),
+gutter: 6pt,
+```java
 import java.net.*;
 import java.io.*;
 
 public class Producer {
   public static void main(String args[]) {
     DatagramSocket aSocket = null;
+
     try {
       aSocket = new DatagramSocket(6789); 
       byte[] buffer = new byte[1000];
@@ -223,7 +227,8 @@ public class Producer {
             buffer.length
           );
         aSocket.receive(request);
-        out = Integer.toString(item).getBytes();
+        out = 
+          Integer.toString(item).getBytes();
         DatagramPacket reply = 
           new DatagramPacket(
             out, 
@@ -232,20 +237,24 @@ public class Producer {
             request.getPort()
           );
         aSocket.send(reply);
-        System.out.println("item --> " + item);
+        System.out.println(
+          "item --> " + item
+        );
       }
     } catch (SocketException e) {
-      System.out.println("Socket: " + e.getMessage());
+      System.out.println(
+        "Socket: " + e.getMessage()
+      );
     } catch (IOException e) {
-      System.out.println("IO: " + e.getMessage());
+      System.out.println(
+        "IO: " + e.getMessage()
+      );
     } finally {
     if (aSocket != null) aSocket.close();
     }
   }
-}```]),
-text(
-  size: 7pt,
-  [
+}```,
+
 ```java
 import java.io.*;
 import java.net.*;
@@ -261,7 +270,7 @@ public class Consumer {
           byte[] message = args[0].getBytes();
           InetAddress aHost = 
             InetAddress.getByName(args[1]);
-          int serverPort = 6789; // fyrirfram ákveðið port
+          int serverPort = 6789;
           DatagramPacket request = 
             new DatagramPacket(
               message, 
@@ -272,32 +281,35 @@ public class Consumer {
           aSocket.send(request);
           byte[] buffer = new byte[1000];
           DatagramPacket reply = 
-            new DatagramPacket(buffer, buffer.length);
+            new DatagramPacket(
+              buffer, 
+              buffer.length
+            );
           aSocket.receive(reply);
           System.out.println(
-            "Reply: " + new String(reply.getData())
+            "Reply: " + 
+            new String(reply.getData())
           );
         }
       } catch (SocketException e) {
-        System.out.println("Socket: " + e.getMessage());
+        System.out.println(
+          "Socket: " + e.getMessage()
+        );
       } catch (IOException e) {
-        System.out.println("IO: " + e.getMessage());
+        System.out.println(
+          "IO: " + e.getMessage()
+        );
       } finally {
       if (aSocket != null) aSocket.close();
     }
   }
 }
-```])
-)
+```)
 
 = Connection oriented sockets
 #question([Útfærið Java server sem tekur við streng en túlkar hann sem heiltölu $n$ og framkvæmir síðan endurkvæmt Fibonacci reiknirit til að finna n-tu Fibonacci töluna. Breytið síðan útfærslunni ykkar til að nota marga þræði _(multithreaded)_.]) 
 
-#grid(
-  columns: (1fr, 1fr),
-  gutter: 6pt,
-  text(size: 6pt, 
-    [```java
+```java
 import java.net.*;
 import java.io.*;
 
@@ -330,8 +342,9 @@ public class ConnectionOrientedClient {
       }
     }
   }
-}```]),
-text(size: 6pt, [```java
+}```
+
+```java
 import java.net.*;
 import java.io.*;
 
@@ -351,7 +364,7 @@ public class ConnectionOrientedServer {
     }
   }
 } 
-```]))
+```
 
 = Scheduling reiknirit
 Skoðið eftirfarandi töflu og / eða mynd:
@@ -529,3 +542,151 @@ public class MyAssignment12 extends Thread {
   }
 }
 ```])
+
+= Semaphores
+#question([
+  Notið semaphores til að leysa eftirfarandi samstilli _(synchronisation)_ vandamál:
+
+  Fjölskylda sem samanstendur af *mömmu*, *pabba* og *tveimur börnum* ,sem deila sömu hegðun, byrja alla daga eins.
+  - Allir byrja daginn á því að fara á klósettið (`useToilet()`)
+    - Röðin sem þau nota klósettið er ekki sett í stein
+    - Það er bara eitt klósett á heimilinu
+  - Eftir að pabbinn hefur notað klósettið býr hann til drykki fyrir krakkana (`prepareDrinks()`)
+  - Eftir að mamman hefur notað klósettið býr hún til mat fyrir fjölskylduna (`prepareFood()`)
+  - Ef bæði matur og drykkir eru til þá borða krakkarnir (`haveBreakfast()`)
+  - Ef barn er búið að borða tekur mamman það og keyrir í skólann `takeAndDriveToSchool()`
+  - Ef barn er búið að borða tekur pabbinn af borðinu og gengur frá ` (clearTable())`
+  ])
+Það sem þarf að passa hér er að hlutir séu ekki gerðir áður en allir þeir sem hluturinn hefur áhrif á hafa klárað sitt. Þetta er gert með því að nota `init()`, `wait()` og `signal()` á réttum stöðum.
+
+#grid(
+columns: (1fr, 1fr),
+gutter: 6pt,
+```java
+Semahpore toilet = new Semaphore(1);
+Semaphore food = new Semaphore(0);
+Semahpore drink = new Semaphore(0);
+Semaphore foodFin = new Semaphore(0);
+Semaphore drinkFin = new Semaphore(0);
+
+parallel {
+  child(), 
+  child(), 
+  mother(), 
+  father()
+}
+```,
+```java
+child() {
+  toilet.wait()
+  useToilet()
+  toilet.signal()
+  food.wait()
+  drink.wait()
+
+  haveBreakfast()
+
+  foodFin.signal()
+  drinkFin.signal()
+}
+```,
+```java
+mother() {
+  toilet.wait()
+  useToilet()
+  toilet.signal()
+
+  prepareFood()
+  // fyrra barn látið vita
+  food.signal() 
+  // seinna barn látið vita
+  food.signal() 
+
+  // fyrra barn klárar
+  foodFin.wait() 
+  // seinna barn klárar
+  foodFin.wait() 
+  takeAndDriveToSchool()
+}
+```,
+```java
+father() {
+  toilet.wait()
+  useToilet()
+  toilet.signal()
+  
+  prepareDrinks()
+  // fyrra barn látið vita
+  drink.signal() 
+  // seinna barn látið vita
+  drink.signal() 
+
+  // fyrra barn klárar
+  drinkFin.wait() 
+  // seinna barn klárar
+  drinkFin.wait() 
+  clearTable()
+}
+```)
+
+= Java semaphores
+#question([Breytið lausn úr verkefni 11 eða 12 þannig að vandamálið sé leyst með notkun semaphora úr java])
+
+```java
+import java.util.concurrent.Semaphore;
+
+public class MyAssignment14 extends Thread { 
+  private static Counter counter;
+  private static long max;
+  private static Semaphore sem;
+
+  public static long main(long iterationsPerThread) {
+    Thread thread1 = new MyAssignment14();
+    Thread thread2 = new MyAssignment14();
+
+    thread1.setName("0");
+    thread2.setName("1");	
+    sem = new Semaphore(1);	
+    max = iterationsPerThread;
+    counter = new Counter();	
+
+    thread1.start(); 
+    thread2.start();
+      
+    try {
+      thread1.join();
+      thread2.join();
+    }
+    catch(Exception ex) {
+      System.out.println("Exception" + ex);
+    }
+    return counter.getIn();
+  }
+
+  public void run() {
+    try {
+      for (int i = 1; i <= max; i++) {
+        System.err.print(this.getName());
+        sem.acquire(); // eins og wait í dæmi 13
+        counter.increment(max);
+        sem.release(); // eins og signal í dæmi 13 
+      }
+    } catch (InterruptedException ie) { /* error */ }
+  }
+}
+```
+
+```java
+public class Counter {
+  public static volatile long in = 0;
+  public void increment(long max) {
+    long next_free_slot = in + 1;
+    in = next_free_slot;
+  }
+  public long getIn() {
+    return in;
+  }
+}
+```
+
+
