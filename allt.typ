@@ -11,6 +11,14 @@
   )
 }
 
+#let doc(body) = {
+  rect(
+    inset: 0pt,
+    stroke: 2pt,
+    image(body)
+  )
+}
+
 
 #align(center, text(20pt)[
   #text(12pt, [*samansafn verkefna og svara*])\ _TÖL401G - Stýrikerfi_
@@ -372,7 +380,7 @@ Skoðið eftirfarandi töflu og / eða mynd:
   [Service time], [4],[11],[8],[5],[4],
   [Priority], [mid],[low],[high],[mid],[high]
 )
-#align(center, image("imgs/scheduling.png"))
+#align(center, image("img/scheduling.png"))
 
 == Raðið ferlum eftir reikniritum og reiknið tíma
 - Þjónustutími _(residance time)_ fyri feril er reiknaður sem: 
@@ -383,31 +391,31 @@ Skoðið eftirfarandi töflu og / eða mynd:
 
 === FCFS (first come first served)
 Hér er klárað ferla í þeirri röð sem þeir koma inn. Ferlar eru geymdir í einhverskonar biðröð þar sem næsti í röðinni er tekinn út eftir að sá á undan klárar.
-#image("imgs/fcfs.png")
+#image("img/fcfs.png")
 - Meðalþjónustutími = $(4-0 + 15-2 + 23-3 + 28-14 + 32-18)/5 = 13$
 - Meðalbiðtími = $(0+ 4-2 + 15-3 + 23-14 + 28-18)/5 = 6.6$
 
 === SJF (shortest job first)
 Hér er svipað og FCFS við höfum biðröð þar sem valið er úr eftir að núverandi ferill klárar, nema núna veljum við minnsta feril sem er í biðröðinni og klárum hann.
-#image("imgs/sjf.png")
+#image("img/sjf.png")
 - Meðalþjónustutími = $(4 + 23-2 + 12-3 + 32-14 + 27-18)/5 = (4+ 21+ 9+ 18+ 9)/5 = 12.2$
 - Meðalbiðtími = $(0 + 12-2 + 4-3 + 27-14 + 23-18)/5 = (0+10+1+13+5)/5 = 5.8$
 
 === SRTF (shortest remaining time first)
 Hérna höfum við biðröðina okkar nema hvað við bíðum ekki endilega eftir því að fyrri ferill hafi klárað til að byrja á nýjum ferli. Þegar nýr ferill kemur inn þá athugum við hvort hann sé með styttri vinnslutíma og ef svo er geymum við núverandi feril og byrjum þennan nýja.
-#image("imgs/srtf.png")
+#image("img/srtf.png")
 - Meðalþjónustutími = $(4 + 32-2 + 12-3 + 19-14 + 23-18) / 5 = (4+30+9+5+5)/5 = 10.6$
 - Meðalbiðtími = $(0 + 30-11 + 9-8 + 5-5 + 5-4) / 5 = (0+19+1+0+1) / 5 = 4.2$
  
 === RR (round robin)
 Round robin notast við fyrirfram skilgreindan _"time quantum "_ sem í þessu tilfelli er $4$. Það þýðir að hver ferill fær að vinna í $4$ einingar af tíma og þá er næsti ferill í biðröðinni valinn. Þetta er endurtekið þar til allir ferlar eru kláraðir.
-#image("imgs/rr.png")
+#image("img/rr.png")
 - Meðalþjónustutími = $(4 + 27-2 + 20-3 + 32-14 + 31-18) / 5 = (4+25+17+18+13)/5 = 15.4$
 - Meðalbiðtími = $(0 + 25-11 + 17-8 + 18-5 + 13-4) / 5 = (0+14+9+13+9)/5 = 9$
 
 === RR-prio (round robin with priority)
 Svipaðar pælingar og með round robin nema hvað við skiptum ferlum upp í mismunandi biðraðir eftir forgangi, sjá í töflunni _"priority"_ fyrir hvern feril. Þegar tíminn _"time quantum"_ er liðinn veljum við næst þá biðröð sem hefur hæstan forgang og vinnum með hana þangað til allir hennar ferlar hafa klárað.
-#image("imgs/rrprio.png")
+#image("img/rrprio.png")
 - Meðalþjónustutími = $(4 + 32-2 + 12-3 + 25-14 + 24-18)/5 = (4+30+11+9+6)/5 = 12$
 - Meðalbiðtími = $(0 + 30-11 + 11-8 + 9-5 + 6-4)/5 = (0+19+3+4+2)/5 = 5.6$
 
@@ -436,7 +444,7 @@ cpu(d): Ferill vinnur í $d$ tíma og hættir
 - P2: arr(2), cpu_io(5, 2), cpu(1)
 - P3: arr(4), cpu_io(1, 1), cpu(2)
 ]),
-image("imgs/roundandqueue.png")
+image("img/roundandqueue.png")
 )
 
 == Reiknið meðalþjónustutíma
@@ -928,3 +936,179 @@ $ C=mat(1,1;5,1;0,0), A=mat(5,7), R=mat(5,2;3,1;0,0) $
 
 Nú vinna auðlindirnar úr $P_3$ á móti því sem $P_2$ bað um og við getum klárað bæði $P_1$ og $P_2$ þannig þessi staða er ekki deadlock og við getum samþykkt beiðnina.
 
+= Dynamic memory managment systems
+#question([Komið eftirfarandi gildum inn í rétt hólf samkvæmt tilheyrandi reikniriti
+#rect(stroke: 2pt, inset: 0pt,image("img/ass19values.png"))
+Gildin eru sett inn í vaxandi röð, þe $m_1$ fer inn á undan $m_2$, skref eru talin þegar verið er að leyta að plássi til að passa inn í, sama hvort bendir sé hreyfður eða ekki.])
+
+== First fit
+First fit snýst um að setja gildi inn í fyrsta hólf sem hefur nóg pláss, þegar hólf er fundið er leit hafin aftur fyrir næsta á byrjunarreit. 
+#rect(stroke: 2pt, inset: 0pt, image("img/ff.png"))
+
+== Next fit
+Next fit er svipað og first fit nema í stað þess að fara aftur á byrjun eftir að finna hólf, þá er haldið áfram frá síðasta fundna hólfi.
+#rect(stroke: 2pt, inset: 0pt, image("img/nf.png"))
+
+#pagebreak()
+== Best fit
+Hér er alltaf valið úr öllum opnum hólfum, það sem mun skilja minnst eftir ef sett er í það hólf, þar sem það er alltaf vitað um alla er skrefafjöldi jafn fjölda hólfa sinnum fjölda staka.
+#rect(stroke: 2pt, inset: 0pt, image("img/bf.png"))
+
+== Worst fit
+Öfugt við best fit, finnur hólfið sem mun skylja mest eftir þegar stak er sett þar.
+#rect(stroke: 2pt, inset: 0pt, image("img/wf.png"))
+
+= Paged memory management
+#question([Við fáum gefið PMMU sem styður 10 bita raunlæg vistföng _(physical addresses)_ en getur samt aðeins notað 8 bita rökvistföng _(logical addresses)_. Síðustærðin er 64 bæti og stærð orða er 1 bæti.])
+
+== Í hversu margar síður skiptist rökvistfangssvæðið?
+Rökvistfangssvæðið inniheldur $2^8 = 256$ vistföng og hver síða inniheldur 64 orð, ef við deilum fjölda vistfanga með fjölda orða í síðu fáum við fjölda síða sem er $256 / 64 = 4$
+
+== Í hversu marga ramma skiptist raunvistfangssvæðið?
+Gerum ráð fyrir því að rammastærð sé sú sama og síðustærð $64$ bæti, við höfum $2^10 = 1024$ raunvistföng sem skiptast yfir $2^10 / 2^6 = 2^4 = 16$ ramma
+
+== Hversu mörgum forritum má hlaða inn í minni með skorðum?
+#question([Við höfum þær skorður að  ekkert swapping sé notað, gerum ráð fyrir því að allt raunvistfangssvæðið sé í boði fyrir forrit sem nota allt rökvistfangssvæðið sitt.]) 
+Þá einfaldlega deilum við fjölda ramma með fjölda síðna sem er $16/4 = 4$
+
+== Hversu mörgum forritum má hlaða í minni án skorða?
+#question([Núna getum við notað swapping, er möguleiki að segja til um hversu mörg forrit má hlaða inn í minni?])
+Það er hægt að koma fleiri forritum inn í minni ef notast er við swapping eða demand paging. Hinsvegar fer það eftir stærð raunminnisins og minniskrafa forritana hversu mörg forrit má hlaða inn.
+
+== Hversu margar færslur _(entries)_ hefur síðutafla kerfisins?
+Færslurnar í síðutöflu samsvara skiptingu á rökvistföngum, þar sem þetta kerfi hefur skiptir sínum rökvistföngum niður á 4 síður er greinilegt að það hafi aðeins fjórar færslur í síðutöflunni sinni.
+
+== Hversu marga bita þarf til að tákna línu í síðutöflu?
+Hver færsla vísar í ramma og segir til hvort hann sé _valid_ eða ekki, við höfum 16 ramma sem er táknað í binary með $4$ tölum þannig við þurfum þá fjóra bita fyrir ramma vistfang + 1 bita fyrir valid, við þurfum því 5 bita í heildina.
+
+== Hvað er raunvistfang rökvistfangsins 42?
+Byrjum á að finna síðunúmer og offset: 
+Við finnum síðunúmer með því að deila rökvistfanginu með síðustærð og námunda niður, síðunúmerið verður því $floor(42/64) = 0$, gildið á fyrst staki í síðutöflu[0], við finnum offsettið á svipaðan máta, nema núna moddum við rökvistfangið við síðustærðina og fáum $42 % 64 = 42$ 
+
+Raunvistfangið verður því $0*64+42 = 42$
+
+== Hvað er raunvistfang rökvistfangsins 191?
+Gögnum í gegnum sömu skref og fyrir ofan
+Síðunúmer: $floor(191/64) = 2$, gildið á staki [2] í síðutöflu er 10, offset: $191 % 64 = 63$
+
+Raunvistfang: $10 dot.op 64 + 63 = 703$
+
+= Úthlutunarreiknirit
+#question([Við fáum í hendurnar töflu sem sýnir les/skrifa köll á síður
+#grid(
+columns: (2fr, 1fr),
+gutter: 6pt,
+table(
+  columns: (auto, 1fr,1fr,1fr,1fr,1fr,1fr,1fr,1fr),
+  "Reference number", "1.", "2.", "3.", "4.", "5.","6.","7.","8.",
+  "Page reference", "0","1","3","1","2","0","1","2",
+  "Read or Write", "R","R","W","W","R","R","R","W"),
+align(horizon, [ Notið síðan tilheyrandi reiknirit til þess að fylla inn í töflur með þessum upplýsingur] ))])
+
+== FIFO
+Hér er aðgangi stjórnað með biðröð. Bendirinn bendir á það sem kom fyrst inn, ef það kemur inn reference sem er ekki í töflunni nú þegar er því reference skipt út fyrir það sem er undir bendinum og hann síðan færður einn niður, ef hann er á botni færist hann efst upp.
+#doc("img/2023-05-02-13-37-08.png")
+
+== Second-Chance / Clock
+Hvert stak fær R bita þegar þau komast inn í röðina. Bendirinn færist ekki nema á page faulti. Þegar það kemur page fault ítrar bendirinn yfir öll stök og tekur burt R bitann, ef það finnur stak sem hefur ekki R bita, þá er því staki skipt út.
+#doc("img/2023-05-02-13-53-13.png")
+
+== Enchanced Second-Chance (NRU)
+Nú geta stök haft fjögur _"state"_ $1:(" "," "), 2: (" ",M), 3: (R," "), 4: (R, M)$, í þessu dæmi eru reference endurstillt fyrir fjórða og sjöunda. Bendirinn færist bara niður með page faulti og ítrar yfir stökin, lækkandi þau um eitt state í hverri yfirfærslu. Þegar það kemur að staki í state 1 eða nær að lækka niður í state 1 þá er því staki skipt út.
+#doc("img/2023-05-02-13-54-30.png")
+
+#pagebreak()
+== Least-Recently-Used (LRU)
+Hér í dæminu er enginn bendir en gott er að láta bendinn benda á það stak sem var notað fyrir lengstum tíma, því það er stakið sem skipt verður út. Frekar einfalt ef maður heldur utan um reference number fyrir hvern ramma. 
+#doc("img/2023-05-02-13-55-22.png")
+
+== Optimal
+Eiginlega ekki hægt í alvörunni, horft í framtíðina og því staki kemur seinast skipt út.
+#doc("img/2023-05-02-13-57-22.png")
+
+= Paging í praktík
+#question([#grid(columns: (1fr, 1fr), gutter: 6pt, [Við fáum gefið kerfi sem notar demand pagint til að úthluta sýndarminni, síður og/eða rammar eru $1$KB, stærð raunskyndiminnisins er bara 1 rammi. 
+
+    Forritið notar LRU til að skipta síðum og keyrir eftirfarandi C-kóða],
+```c
+int i,j;
+int data[128][128];
+
+for (j = 0; j < 128; j++) {
+  for (i = 0; i < 128; i++) {
+    data[i][j] = 0;
+  }
+}
+```)
+Gerið ráð fyrir því að breyturnar `i` og `j` séu geymdar í CPU registrum. Hver `int` hlutur tekur 4 byte af minni])
+
+== Hversu margar síður eru nýttar undir `data` í sýndarminni?
+Við erum að geyma $4 dot.op 128 = 512$ bæti af gögnum inn í hverju innra fylki, það þýðir að hver rammi getur haldið tveimur stökum úr ytra fylkinu, þ.e. $128/2 = 64$ síður
+
+== Hversu mörgum page faults lendum við í upphaflega?
+Upphaflega inniheldur fylkið engin gögn og eins og uppsetningin á kóðanum er núna þá ítrum við yfir ytri stökin áður en við ítrum yfir innri stökin. Það þýðir að fyrir 128 innri stök lendum við í $128*64=1044$ page faultum. Þetta er vegna þess að við þurfum að skipta um síðu fyrir annað hvert ytra stak.
+
+== Hvernig má minnka fjölda page-faulta?
+#grid(gutter: 6pt, columns: (2fr, 1fr), 
+align(horizon, [ Það er frekar einfalt, við getum breytt þessu þannig að við fáum bara page fault fyrir hvert 256-tugasta stak. Við gerum það með því að víxla á `i` og `j`, annaðhvort í for-lykkjunum eða í fylkja aðgenginu en ekki báðum.]),
+```c
+int i,j;
+int data[128][128];
+
+for (i = 0; i < 128; i++) {
+  for (j = 0; j < 128; j++) {
+    data[i][j] = 0;
+  }
+}
+```)
+
+= FAT systems
+#question([Við fáum í hendurnar þrjú skráarkerfi sem nota öll FAT, fyrsta hefur bara $10"KB"$ clustera, annað $1"KB"$ clustera og þriðja $0.5"KB"$ clustera.])
+
+== Uppskipting skráa
+#question([Nú viljum við setja 1000 0.5KB skrár, 100 5KB skrár og 10 50KB skrár inn í hvert kerfi fyrir sig. Hversu mikið pláss í hverju kerfi í KB er ekki hægt að nýta vegna internal fragmentation])
+
+Allir þessara skráahópa eru 500KB í heild, ef við byrjum að reikna plássið sem tapast í 10KB skráarkerfinu þá sjáum við að heildartap verður $10000"KB"$:
+- $1000 dot.op 0.5"KB"$ - hver cluster skilur eftir $9.5"KB"$ fyrir hverja skrá, tapað pláss verður $9500"KB"$
+- $100 dot.op 5"KB"$ - hver cluster skilur eftir $5"KB"$ fyrir hverja skrá, tapað pláss verður $500"KB"$
+- $10 dot.op 50"KB"$ - ekkert tap
+
+Í 1KB cluster kerfinu tapast í heildina $1000 dot.op 0.5"KB" = 500"KB"$
+
+Í 0.5KB cluster kerfi tapast ekkert
+
+== Kemst eftirfarandi fyrir?
+#question([Nú höfum við hámarka á FAT kerfunum 1500KB, er hægt að nýta kerfin fyrir ofan til þess að geyma allar skrárnar í dæminu fyrir ofan?])
+=== FAT kerfið er ekki geymt í clusterunum
+Það væri hægt að geyma skrárnar í 0.5KB clusterunum þar sem þar er ekkert tap.
+
+=== Ef FAT kerfið er geymt í clusterum, hversu marga clustera tekur það?
+Við erum að notast við FAT16 sem er 16 bitar að stærð, þ.e. 2 byte
+
+- Í 10KB kerfinu höfum við 150 klustera, $(1500"KB") / (10"KB") = 150$, þá þurfum við $150 dot.op 2B=300B$ af minni fyrir kerfið sjálft, það gera $ceil(( 300B )/( 10240B )) = 1$ cluster 
+- 1KB kerfið hefur 1500 clusters og 3000B af minni undir FAT sem gera $ceil((3000B)/(1024B))=3$ clustera
+- Kerfið með 0.5KB gerir 3000 klusters, 6000B fyrir FAT, $ceil((6000B)/(512B)) = 12$ clusters
+
+= I-node file system
+== Hámarksstærð kerfis
+#([Við höfum I-node kerfi sem styður að geyma 98 _"direct block"_ benda, einn bendi á _"single indirect block"_ og einn bendi á _"double indirect block"_. Hvert _"indirect block"_ getur geymt 100 _block_ benda. Hvert block er 1KB að stærð. Hvað er hámarksstærð skráa sem geyma má í kerfinu?])
+
+$ "SIB" + "DIB" + "DB" = 100 dot.op 1_"KB" + 100^2 dot.op 1_"KB" + 98 dot.op 1_"KB" = 100_"KB" + 10000_"KB" + 98_"KB" = 10198_"KB" $
+
+== Leit að forriti
+#question([Við fáum gefin _"absolute path"_ að skránni `/usr/bin/vi`. Hvað þarf að sækja á disk til að athuga hvort þessi skrá sé yfirhöfuð til. Gerið ráð fyrir því að `/` (root) sé núþegar búið að hlaða inn í minni. Sýnið þau skref sem eru tekin.])
+Fyrst að rótin er í skyndiminninu getum við leitað þar að `usr` möppunni, við þurfum ekki _"disk access"_ til þess að athuga þetta en við þurfum _DA_ til þess að hlaða inn I-node `usr` möppunnar og síðan annað til þess að hlaða inn kubbum hnútsins. Þetta eru tvö _DA_. Við gerum svo eins til að leita að `bin` möppunni innan `/usr/` og fáum þá aftur tvö _DA_. Að lokum leitum við innan `/usr/bin/` að `vi` skránni. Til þess þurfum við ekki _DA_.
+
+== Skráarkerfis uppfærslur
+#question([Lýsið því sem gerist þegar eftirfarandi skipanir eru keyrðar])
+=== `link("ParentDirectory/existingFile","ParentDirectory/newFile")`
+Skipunin býr til nýja skrá sem er "hard link" á skrá sem nú þegar er til. Harður hlekkur er bendir á I-node fyrir skrá sem nú þegar er til. Skrefin sem eru tekin:
+- Ný skrá búin til inn í "ParentDirectory" I-node
+- Block/s teknir frá innan "ParentDirectory" sem geyma vísun í: 
+  - "existingFile" I-node 
+  - Lengd skráarnafnsins 
+  - Skráarnafnið sjálft
+- \#links er hækkað um 1 í "existingFile" metadata
+
+=== `symlink("ParentDirectory/existingFile","ParentDirectory/newFile")`
+Symlink er skrá sem geymir slóð á aðra skrá, skrefin sem við tökum eru færri. Við þurfum að taka frá block/s til að gera ráð fyrir nýju I-node og slóðinni ásamt því að bæta nýrri færslu inn í "ParentDirectory" I-nodeið.
