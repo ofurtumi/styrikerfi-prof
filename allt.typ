@@ -37,7 +37,7 @@
     #link("https://github.com/Sveppi")[Sverrir Sigfúrsson]
   ],
   align(center)[
-    #link("")[Sigríður Birna]
+    #link("https://github.com/digitalsigga")[Sigríður Birna]
   ],
   align(center)[
     #link("https://github.com/ofurtumi")[Þorvaldur Tumi]
@@ -50,7 +50,7 @@
 #outline(title: "Yfirlit", depth: 2)
 
 #show heading: it => {
-  if it.level == 1 and it.body != "Yfirlit" [#pagebreak()]
+  if it.level == 1 [#pagebreak()]
   smallcaps([#it])
 }
 
