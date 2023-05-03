@@ -32,7 +32,8 @@
 }
 
 #grid(
-  columns: (1fr, 1fr, 1fr, 1fr),
+  columns: (1fr, 1fr, 1fr),
+  gutter: 8pt,
   align(center)[
     #link("https://github.com/Sveppi")[Sverrir Sigfúrsson]
   ],
@@ -44,6 +45,12 @@
   ],
   align(center)[
     #link("https://github.com/BjarniTS")[Bjarni Þór]
+  ],
+  align(center)[
+    #link("https://github.com/hakoningir")[Hákon Ingi]
+  ],
+  align(center)[
+    #link("https://github.com/BjarniTS")[Sigurður Örn]
   ]
 )
 
