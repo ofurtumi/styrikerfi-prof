@@ -19,7 +19,6 @@
   )
 }
 
-
 #align(center, text(20pt)[
   #text(12pt, [*samansafn verkefna og svara*])\ _TÖL401G - Stýrikerfi_
 ])
@@ -50,7 +49,7 @@
     #link("https://github.com/hakoningir")[Hákon Ingi]
   ],
   align(center)[
-    #link("https://github.com/BjarniTS")[Sigurður Örn]
+    #link("https://github.com/sog6")[Sigurður Örn]
   ]
 )
 
