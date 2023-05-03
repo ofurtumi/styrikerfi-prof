@@ -2,6 +2,13 @@
 
 Samasafn af efni úr TÖL401G - Stýrikerfi, áfanga við HÍ
 
+Sett saman af:
+
+- [@ofurtumi](http://github.com/ofurtumi)
+- [@kjartanoli](https://github.com/kjartanoli)
+- [@gunnarbjo](https://github.com/gunnarbjo)
+- [@sturla-freyr](https://github.com/sturla-freyr)
+
 ## Uppsetning skráa
 
 Mappan [10_verkefni](./10_verkefni/) inniheldur eintak af öllum skilaverkefnum sem eftir endurgjöf hafa fengið 10  
@@ -9,11 +16,11 @@ Auk verkefnana er skjalið [AMT](./10_verkefni/AMT.pdf) (allt með tíu), sem he
 
 Eftirfarandi aðilar fá sérstakar þakkir fyrir að senda inn verkefni:
 
-- @Sveppi
-- @digitalsigga
-- @BjarniTS
-- @hakoningir
-- @sog6
+- [ @Sveppi ](https://github.com/Sveppi)
+- [ @digitalsigga ](https://github.com/digitalsigga)
+- [ @BjarniTS ](https://github.com/BjarniTS)
+- [ @hakoningir ](https://github.com/hakoningir)
+- [ @sog6 ](https://github.com/sog6)
 
 Skráin [slides.pdf](./slides.pdf) inniheldur allar glærur sem lagðar hafa verið fyrir yfir árið sameinaðar í eitt skjal.
 
