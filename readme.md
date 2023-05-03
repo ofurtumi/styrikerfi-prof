@@ -1,6 +1,15 @@
 # yfirlit verkefna
 
-samansafn af verkefnum sem fengu 10
+Samasafn af efni úr TÖL401G - Stýrikerfi, áfanga við HÍ
+
+## Uppsetning skráa
+
+- mappan [10_verkefni](./10_verkefni/) inniheldur öll skilaverkefni áfangans sem hafa fengið 10 eftirfarandi fá sérstakar þakkir fyrir að senda inn verkefni:
+  - @Sveppi
+  - @digitalsigga
+  - @BjarniTS
+  - @hakoningir
+  - @sog6
 
 ## komin
 
@@ -28,8 +37,3 @@ samansafn af verkefnum sem fengu 10
 - [x] verkefni 22 - Tumi
 - [x] verkefni 23 - Sverrir
 - [x] verkefni 24 - Bjarni
-
-## vantar
-
-- [ ] verkefni 25
-- [ ] verkefni 26
