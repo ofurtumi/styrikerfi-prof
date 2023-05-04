@@ -145,16 +145,24 @@ schedulerUnfinished() {
 
 // kóðinn sem var skilað
 schedulerFinished() {
-    if (called by timer interrupt) { // Time slice of current process expired  
+    if (called by timer interrupt) { 
+        /* Time slice of current process expired */ 
         addToTail(running, ready);
-    } else if (called by I/O system call) { // I/O request by current process 
+    }
+    
+    else if (called by I/O system call) { 
+        /* I/O request by current process*/ 
         addToTail(running, waiting);
-    } else if (called by I/O interrupt) { // I/O of process ioCompleted completed 
-        addToTail(running, waiting);
-        findAndRemove(ioCompleted, waiting);
+    } 
+
+    else if (called by I/O interrupt) { 
+        /* I/O of process ioCompleted completed*/ 
+        if (running != null) { addToTail(running, waiting); }
+        temp_completed = findAndRemove(ioCompleted, waiting);
+        addToTail(temp_completed, ready)
     }
 
-    // Further code outside if statements (if required)
+        // Further code outside if statements (if required)
     interruptOn()
     if (ready == null) {
         sleep()
