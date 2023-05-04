@@ -624,9 +624,6 @@ public class DiningPhilosophers {
         }
     }
 }
-
-
-
 ```
 
 == Sleeping barber problem.
@@ -645,29 +642,365 @@ int numberOfFreeWaitRoomSeats = N; // Number of free seats in the waiting room
 
 // Barber:
 void Barber (){
-    while (true) {
-        barberSleep.wait(); // Try to sleep
-        ME.wait(); // Enter the waiting room
-        numberOfFreeSeats++; // One chair becomes free
-        barberChair.signal(); // Invite customer into the chair
-        cutHairOfCustomerOnChair(); // Cut hair
-        ME.signal(); // Release the waiting room
-    }
+  while (true) {
+    barberSleep.wait(); // Try to sleep
+    ME.wait(); // Enter the waiting room
+    numberOfFreeSeats++; // One chair becomes free
+    barberChair.signal(); // Invite customer into the chair
+    cutHairOfCustomerOnChair(); // Cut hair
+    ME.signal(); // Release the waiting room
+  }
 }
 
 // Customer:
 void Customer(){
-    ME.wait(); // Enter the waiting room
-    if (numberOfFreeWaitRoomSeats > 0) {
-        numberOfFreeWaitRoomSeats--; // Occupy a chair
-        barberSleep.signal(); // Wake up the barber if needed
-        ME.signal(); // Release the waiting room
-        barberChair.wait(); // Wait until invited
-        goToBarberChairGetHairCutLeave(); // Get haircut
-    } else {
-        ME.signal(); // Release the waiting room
-        leaveWithoutHaircut(); // No free chairs
-    }
+  ME.wait(); // Enter the waiting room
+  if (numberOfFreeWaitRoomSeats > 0) {
+    numberOfFreeWaitRoomSeats--; // Occupy a chair
+    barberSleep.signal(); // Wake up the barber if needed
+    ME.signal(); // Release the waiting room
+    barberChair.wait(); // Wait until invited
+    goToBarberChairGetHairCutLeave(); // Get haircut
+  } else {
+    ME.signal(); // Release the waiting room
+    leaveWithoutHaircut(); // No free chairs
+  }
 }
-
 ```
+
+#week(11)
+
+= Illustrate how deadlock can occur.
+Multiple processes can have access to the same resource. If the processes are not properly synced together they can end up in a deadlock, a situation where they are waiting for each other to release this shared resource. 
+
+= Define the four necessary conditions tha characterize deadlock.
+The four necessary conditions are:
++ *Mutual exclusion:* At least one resource must be held in a non-shareable mode. Only one process can use the resource at any given instant of time. (non-shareable resource)
++ *Hold and wait:* A process must be holding at least one resource and waiting for resources currently held by other processes. (resource holding)
++ *No preemption:* A resource can be released only voluntarily by the process holding it, after that process has completed its task. (no preemption)
++ *Circular wait:* A set ${P_0, P_1, …, P_n}$ of waiting processes must exist such that $P_0$ is waiting for a resource that is held by $P_1$, $P_1$ is waiting for a resource that is held by $P_2, …, P_(n–1)$ is waiting for a resource that is held by $P_n$, and $P_n$ is waiting for a resource that is held by $P_0$.
+
+We can still apply a general assumption: _if we give a process all the requested resources, the process will finally give all resources back_
+
+= Detect a deadlock situation in a resource allocation graph.
+See picture example in the slides: 7-15
+
+= Detect a deadlock situation using the matrix-based deadlock detection algorithm.
+Given the following vectors and matrices:
+$ E=mat(3,2,3,1) A=mat(2,1,0,0) C=mat(0,0,1,0;2,0,0,1;0,1,2,0) R=mat(2,0,0,1;1,0,1,0;2,1,0,0) $ 
+We can use the safety algorithm to detect whether or not a deadlock exists. The safety algorithm is as follows: 
+- Find and grant a request of instances that $A$ can provide
+- Mark that process as finished and add its resources to $A$
+- Repeat until all processes are finished or there are no more requests that can be granted
+- If all processes are finished, then there is no deadlock. Otherwise there is a deadlock. 
+
+For this example we could grant $P_3$ its resources, mark it as finished and have $A=mat(2,2,2,0)$ resources for the next request. Then we could grant either of $P_1$ or $P_2$ request as they are both asking for an equal or less amount of resources than exist in $A$. 
+  Therefore there is no deadlock.
+
+= Evaluate the four different approaches for handling deadlocks.
+There are 4 different approaches for handling deadlocks:
+- *Ignore the problem:* Easy to implement, but not a great solution. 
+- *Detection and recovery:* Allow system to enter deadlock state, detect it and then recover from it. 
+- *Dynamic avoidance:* Prevent deadlock by careful resource allocation. Reject resource requests that may lead to deadlock. 
+- *Prevention:* Ensure that one of the four necessary conditions for deadlock cannot occur. 
+
+= Apply the Safety algorithm to obtain safe schedules (if they exist)
+See the example of the Safety algorithm in the previous question. 
+
+= Apply the Banker's algorithm for deadlock avoidance.
+The Banker's algorithm makes sure we don't grant requests of resources that will lead to a deadlock. We do this by granting a request and checking if that state is safe. If so, we grant the request, otherwise we deny it. 
+
+= Evaluate approaches for recovering from deadlock.
+There are three approaches for recovering from deadlock:
+- *Human intervention:* The system will inform the operator that a deadlock has occurred. The operator will then decide which process(es) to terminate. 
+- *Process termination:* Abort all deadlocked processes. Abort one process at a time until the deadlock cycle is eliminated.
+- *Resource preemption:* Select a victim. Rollback and restart the victim process so that a requesting process can have its resources. 
+
+#week(12)
+= Differences in physical and logical addresses
+- *Physical address:* The actual address in memory.
+- *Logical address:* The address that the process sees.
+
+$ A_P = F_n * F_s + A_L - (P_n* F_s) " "|" " P_n = floor(A_L / F_s) " "|" " F_n = P[P_n] $
+
+= Explain memory organisation and address binding
+- *MMU:* Memory Management Unit. Translates logical addresses to physical addresses.
+- *Memory organisation:* Memory is divided into fixed-size blocks called frames.
+- *Address binding:* The process is loaded into a frame. The logical address is then translated to a physical address.
+
+== Types of MMUs 
+- *Base and limit registers:* The logical address is added to the base register to get the physical address. The limit register is used to check if the address is valid.
+- *Relocation register:* The logical address is added to the relocation register to get the physical address.
+- *Dynamic relocation register:* The logical address is added to the relocation register to get the physical address. The relocation register is updated after each instruction.    
+
+= Explain Swapping.
+*Swapping:* Moving a process from main memory to secondary memory and vice versa.
+- Used when there is not enough memory to hold all processes.
+- Used when a process is blocked and another process can use the memory.
+- Used when a process is terminated.
+- Used when a process is created.
+- Today swapping is used less and less because it is slow and inefficient.
+
+= Apply first-, next-, best-, and worst-fit strategies for allocating memory contiguously.
+- *First-fit*: Allocate the first hole that is big enough. Search starts at the beginning of memory.
+- *Next-fit*: Allocate the next hole that is big enough. Search starts where the last request was satisfied.
+- *Best-fit*: Allocate the smallest hole that is big enough. Search the entire list, unless the list is ordered by size.
+- *Worst-fit*: Allocate the largest hole. Search the entire list, unless the list is ordered by size.
+
+
+= Explain the distinction between internal and external fragmentation.
+- *External fragmentation:* Total memory space exists to satisfy a request, but it is not contiguous. 
+- *Internal fragmentation:* Free memory within the memory allocated to a process, that can be used to satisfy requests of the process.
+
+= Understand Paged MMUs (PMMUs) with page tables and translation lookaside buffers for speeding up lookups.
+- PMMU: Paged Memory Management Unit.
+- Page table: A table that contains the mapping between logical and physical addresses.
+- Translation lookaside buffer: A cache for the page table. It is used to speed up the translation of logical addresses to physical addresses.
+
+
+= Translate logical to physical addresses in a paging system using PMMU.
+- Logical address space is devided into pages of fixed size.
+- Pages are mapped onto frames in the physical memory using a page table.
+- Pages/frames have same size that is a power of 2, i.e page size$=2^n$.
+- Logical address $A_L$ (having m bits) generated by CPU is devided into:
+    - (m-n bits) page number _p_
+    - (n bits) page offset _d_
+- By looking up the frame number _f_ onto which page _p_ is mapped according to the page table, the resulting physical address $A_p$ (m bits) is:
+    - (m-n bits) frame number _f_
+    - (n bits) page offset _d_
+
+
+= Describe hierarchical paging/multi-level paging.
+- Two-level page table:
+    - Frame level of the first level page table entry points to a frame containing the second level page table for all the pages represented by the first level page table entry
+
+
+    -  First level page table entry is set to invalid to indicate that all the pages represented by the first level page table entry are invalid (in this case, no frame containing second level page table is needed)
+
+= Describe applications of paging: memory protection, circumvent external fragmentation, shared memory
+- *Memory protection:*\ 
+    - Each page table entry has a valid-invalid bit. When this bit is set to valid, the associated page is in the process' logical address space and is thus a legal page. When the bit is set to invalid, the page is not in the process' logical address space.
+
+- *Circumvent external fragmentation:* \ 
+    - Paging can be used to circumvent external fragmentation. External fragmentation occurs when there is enough total memory to satisfy a request, but the available memory is not contiguous. Paging solves this problem by dividing memory into fixed-size blocks called frames and dividing logical memory into blocks of the same size called pages. When a process is loaded into memory, its pages do not need to be contiguous.
+
+- *Shared memory:* \ 
+    - Shared memory can be implemented by having two processes share the same page table entry. This means that the two processes share the same physical memory.
+
+#week(13)
+= Define virtual memory and describe its benefits.
+
+Virtual memory is used by all major operating systems today. VM is the seperation of logical memory and physical memory so the logical address space does not need to map 1:1 to existing physical memory. This has benefits such as only the parts of a program necessary for execution needs to be in memory and therefore only parts of the process are swapped in and out instead of the whole process and requiring less I/O significantly increases speed.
+
+Since only parts of the logical address space need to be in physical memory for each process the degree of multiprocessing is higher. The logical address space can be larger than the physical address space and this has the effect that programmers(& users) do not need to worry about the available physical memory.
+
+Virtual Memory is typically implemented using demand paging.
+
+= Illustrate how pages are loaded into memory using demand paging.
+Roughly comparable to idea of swapping however, instead of whole processes, pages are used
+- Swaps single pages at a time
+- Does not bring in a page until accessed (lazy paging)
+  - Page currently not in physical memory will have in its page table entry the valid bit set to invalid: access to page triggers Page Fault Interrupt that is serviced by OS and will call pager routine to bring in page.
+  - Only bring a page out  when physical memory is needed for a new page
+  - At each context switch, page table pointer of PMMU needs to be updated to point to the page table stored in the PCB of the particular process.
+- Requires Paged MMU and CPU that supports restarting an instruction after a page fault interrupt occurred at exactly the same place and state where it was interrupted.
+== Procedure for Handling a Page Fault: Lecture Slides 9 page 8
+
+= Apply the optimal, FIFO, LRU and Second-Chance page-replacement algorithms.
+- *optimal* Theoretical algorithm for a best, case scenario
+- *FIFO* When replacing a page, choose the fram with the oldest page
+  - Easy to implement
+  - Oldest page might be frequently referenced
+- *LRU* Replace page with the longest time period since it's last reference
+  - Good approximation of optimal
+  - No PMMU supports timestamping a page at each access in modern CPU's
+- *Second-Chance* FIFO but page table entries have a reference bit that if set, moves the page from the head of queue to the tail
+  - Easy to implement
+  - Used by all major OS
+  - Is essentially an approximation of LRU
+  - Degenerates to FIFO if all pages have their reference bit set
+- *Enhanced Second-Chance* Also has a modified bit giving 4 classes of replacement quality
+  - Is a better approximation of LRU
+  - Features required to implement are provided by all modern PMMU's
+  - Periodic resetting of reference bits causes high overhead
+  - May not be sufficient approximation of LRU(See Belady's Anomaly in lecture slides)
+= Describe thrashing the working set of a process, and explain how it is related to program locality.
+A process is thrashing if it is spending more time paging than executing. The working set of a process is the set of memory pages that the process is actively using within a given time window. Program locality refers to the tendency of a process to access a relatively small and localized subset of memory locations during a particular phase of its execution. Program locality can be categorized into two types:
+
+- Temporal locality: If a memory location is accessed, it is likely to be accessed again in the near future. This implies that recently accessed memory pages are more likely to be accessed again soon.
+- Spatial locality: If a memory location is accessed, nearby memory locations are also likely to be accessed in the near future. This suggests that memory accesses tend to be clustered within specific regions of the address space.
+
+When the working set of a process is well accommodated within the available physical memory, the process exhibits good locality. The system efficiently utilizes the available memory, and the process spends most of its time executing tasks rather than waiting for pages to be swapped
+
+If the working set of the process cannot be accommodated within the available physical memory, the system starts swapping pages in and out frequently. As a result, the process loses its locality, leading to increased page faults and reduced performance.
+
+To mitigate thrashing, operating systems use techniques like working set model and page replacement algorithms that take program locality into account. 
+
+= Explain memory compression as alternative to paging out to storage devices
+Memory compression can be a useful alternative to paging out to storage devices in situations where the benefits outweigh the costs, helping to improve system performance and manage memory efficiently. The main idea behind memory compression is to take advantage of redundancy in data stored in memory, compressing the data to free up space for other processes. 
+
+It's advantages over traditional paging are:
+- Faster access because compressed pages are stored in physical memory rather than on disk.
+- Reduced I/O overhead.
+- Energy efficiency: accessing storage devices can consume more power during I/O operations. 
+Memory compression  disadvantages to memory compression:
+- CPU overhead: compression and decompression processes require additional CPU cycles,d- Limited compression ratio: depends on the compressibility of the data. On average: 2-3 compressed pages fit into one frame
+
+\
+
+
+= Describe advanced applications of virtual memory, e.g. copy-on-write or demand loading
+
+== Demand loading
+- If the infrastructure of demand paging is available, demand loading becomes possible.
+- When a process is started, do not load whole binary file containing instructions just mark all pages initially as invalid.
+  - At a page fault, load the according instructions for that page.
+- Advantage: no unnecessary loading of instructions that might never get executed..- Disadvantage: resulting page faults lead to an overhead.
+
+== Prepaging (exact opposite of demand loading):
+- Load all instructions into memory to avoid page faults.
+- Advantage: reduced number of page faults.
+- Disadvantage: unnecessary loading of instructions may occur.
+
+== Growing Heap & Stack
+- Without virtual memory, reserving the right amount of memory is difficult
+  - Too small: stack or heap overflow possible
+  - Too huge: memory is wasted
+With VM, we can just reserve the whole logical address space for a process and reserve a big amount of it for  the stack and heap.
+- While sufficient space for stack and heap is reserved in the logical address space only as many frames as currently required are used
+- As stack and heap increase, just more pages are actually used.
+- Overwriting shared libraries by stack or heap impossible as shared libraries serving as a sentinel or buffer in-between are read-only.(Illustrated on page 28 is lecture slides pack 9)
+While paging avoids external fragmentation, internal fragmentation may still occur within the heap of a process: when releasing allocated heap space, holes in the logical address space of the heap occur.
+
+== Fork Using Copy-on-Write/Lazy-Copy
+At fork, the child process gets an exact copy of the address space of the parent. This is only possible using a programmable MMU: The child’s copy will be located at a different physical address. However, the child will also get a copy of all the parent’s address references. These remain only valid, if a programmable MMU can be used to map the different physical addresses of the copy for the child to the same logical addresses that the parent process used.
+
+However, copying the physical memory of the parent is slow. Instead ust map frames (instead of copying) of parent containing instructions and data into address space of child (shared memory).
+
+However, when parent or child modifies its address space, the copy of the other process must not be modified! 
+Mark shared pages as write-protected in page table entry: as soon as parent or child modify data, page fault interrupt occurs. Only then, just these frames are physically copied. ( “Copy-on-Write”/“Lazy-Copy”)
+
+\
+\
+
+
+= Explain management of kernel-internal memory
+.Kernel memory is often allocated from a free-memory pool different from the list used to satisfy ordinary user-mode processes. There are two primary reasons for this:
+
++ The kernel requests memory for data structures of varying sizes, some of which are less than a page in size. As a result, the kernel must use memory conservatively and attempt to minimize waste due to fragmentation. This is especially important because many operating systems do not subject kernel code or data to the paging system.
+
++ Pages allocated to user-mode processes do not necessarily have to be in contiguous physical memory. However, certain hardware devices interact directly with physical memory—without the benefit of a virtual memory interface —and consequently may require memory residing in physically contiguous pages.
+
+== The Buddy System
+The buddy system allocates memory from a fixed-size segment consisting of physically contiguous pages. Memory is allocated from this segment using a power-of-2 allocator, which satisfies requests in units sized as a power of 2. A request in units not appropriately sized is rounded up to the next highest power of 2
+
+An advantage of the buddy system is how quickly adjacent buddies can be combined to form larger segments using a technique known as coalescing. The obvious drawback to the buddy system is that rounding up to the next highest power of 2 is very likely to cause fragmentation within allocated segments. In fact, we cannot guarantee that less than 50 percent of the allocated unit will be wasted due to internal fragmentation.
+
+#image("img/buddySystem.png", width: 50%)
+
+== Slab allocation
+
+A second strategy for allocating kernel memory is known as slab allocation. A slab is made up of one or more physically contiguous pages. A cache consists of one or more slabs. There is a single cache for each unique kernel data structure, for example, a separate cache for the data structure representing process descriptors, a separate cache for file objects, a separate cache for semaphores, and so forth.
+
+The slab-allocation algorithm uses caches to store kernel objects. When a cache is created, a number of objects—which are initially marked as free—are allocated to the cache. The number of objects in the cache depends on the size of the associated slab. For example, a 12-KB slab (made up of three continguous 4-KB pages) could store six 2-KB objects. Initially, all objects in the cache are marked as free. When a new object for a kernel data structure is needed, the allocator can assign any free object from the cache to satisfy the request. The object assigned from the cache is marked as used.
+
+In Linux, a slab may be in one of three possible states:
+
++ Full. All objects in the slab are marked as used.
+
++ Empty. All objects in the slab are marked as free.
+
++ Partial. The slab consists of both used and free objects.
+
+The slab allocator first attempts to satisfy the request with a free object in a partial slab. If none exists, a free object is assigned from an empty slab. If no empty slabs are available, a new slab is allocated from contiguous physical pages and assigned to a cache; memory for the object is allocated from this slab.
+
+#image("img/slabAlloc.png", width: 60%)
+
+The slab allocator provides two main benefits:
+
++ No memory is wasted due to fragmentation. Fragmentation is not an issue because each unique kernel data structure has an associated cache, and each cache is made up of one or more slabs that are divided into chunks the size of the objects being represented. Thus, when the kernel requests memory for an object, the slab allocator returns the exact amount of memory required to represent the object.
+
++ Memory requests can be satisfied quickly. The slab allocation scheme is thus particularly effective for managing memory when objects are frequently allocated and deallocated, as is often the case with requests from the kernel. The act of allocating—and releasing—memory can be a time-consuming process. However, objects are created in advance and thus can be quickly allocated from the cache. Furthermore, when the kernel has finished with an object and releases it, it is marked as free and returned to its cache, thus making it immediately available for subsequent requests from the kernel.
+
+#week(14)
+= Explain the function of file systems.
+File systems are responsible for organizing, managing and storing data on storage devices. They also handle metadata, access control and ensure data reliability and consistency while providing a structured way for the OS, applications and users to access and manipluate files and directories
+
+= Describe the interfaces to file systems.
+#image("img/fileInterface.png", width: 80%)
+#image("img/fileInterface2.png", width: 80%)
+
+= Understand memory-mapped files.
+A memory-mapped file is a file, or partial file, that has had it's locay into a processes virtual address space. This means it's content can be accesses direordinar memory access (e.g. pointers) instead of much slower system calls. Memory-mapped files allow the OS to load only those pages from a file that are actually accessed. 
+
+
+= Discuss file-system design tradeoffs, including access methods, file sharing, file locking, and directory structures
+
+== Access methods
+- Sequential access. Files are accessed in linear order.
+- Direct access. Files are accessed using a block address or offset, enabling efficient random access.
+- Indexed access. An indexed structure allows for locating data within a file which can provide faster access for some search operations.
+
+== File sharing
+An OS must support file sharing e.g. system files to avoid duplication and application files to allow collaboration. It also has to protect files from being accessed by unauthorised users.
+#image("img/fileProtection.png", width: 80%)
+
+== File locking
+See file sharing
+
+== Directory structures
+
+=== Directories are just files!
+
+Directories contain files and sub-directories organized in a tree from the root directory.
+- Files in different directories are independent of each other
+- A path navigates to files
+- "/" is the directory level seperator
+- A path beginning with "/" is an absolute path otherwise it's relative.
+- Hard links: Points to the block of the original inal file making the 
+wo indistinguishable
+- Symbolic link: A special file that contains a path to the original file
+
+= Explore briefly file-system protection.
+Mostly consists of the following:
+- Authentication: Authenticate the identity if users.
+- File and directory ownership: Each file/directory is associated with an owner, usually the user that created it.
+- File locking and synchronization: Used to maintain data consistency and prevent conflicts in systems with multiple runnings processes or users.
+- Encryption: Optional but useful mechanism for protecting the confidentiality of data stored in the file system.
+.
+= Describe the details of implementing local file systems and directory structures.
+== File system layers
+- Logical file system: manages file pointer, metadata (e.g. owner, permissions, directory contents), symbolic links.
+- File-organisation module: manages in which blocks of the device the file contents is stored (allocation methods) and where free blocks can be found on the device (free space management)..- Basic block I/O: Handles buffers for blocks that are waiting to be transferred to/from storage device, caches blocks.
+- I/O Control: Device driver that is specific to underlying device controller.
+- Device: actual I/O device and controller.
+
+
+= Discuss block allocation methods and free-space managemen
+- Contigious allocation. Is problematic because if a file needs to grow subsequent block may be allocated to other files.
+- Extents: If initial chunk of contiguous blocks is full, use additional contiguous chunks (an extent) that start at a new location and can be added to the already existing extents of a file.
+- Linked and indexed allocation: For each individual fixed-sized block of a file, it is always (even if these blocks are contiguous) stored in the metadata where it is located in the file system. FAT(linked) and I-node(indexed) are of these types.
+= Explore file system efficiency and performance issues.
+- Searching FAT for free clusters: Search the whole FAT for special number indicating a free cluster. Complexity O(n) n=number of clusters.
+- Searching I-node for free block:
+  - I-node only keeps track of allocated blocks, not free blocks. 
+  - Use additional bitmap where one bit indicates wether corresponding block is free or allocated
+  - Complexity O(n) n=number of bits in bitmap
+  - Size of bitmap: as many bits as file system has blocks
+- Defragmentation/Compaction: Move blocks/clusters by copying them to create contigious free space for future files.
+
+= Look at recovery from file system failures
+- Consistency checking: Regularly check file system consistency to prevent that a possible corruption affects even further data.
+  - Often done at the next system boot after a system crashed
+  - Tools for checking file system consistency: fsck on Unix, chkdsk on MS Windows.
+- Journaling/Log-based Transaction-oriented File Systems
+  - Journaling file systems can avoid inconsistencies to occur at all.
+  - At least, inconsistencies due to power outage/system crash while writing data can be prevented
+  - Journaling file systems are state of the art in all modern file systems e.g.(Microsoft NTFS, all modern POSIX/Unix-like file systems, but not FAT).
+  - Based on the concept of transactions: Either write all data or no data!
+  - I.e. either old file system state or new file system state.
+  - Three step approach: announce action, commit action, acknowledge action.
+- Journaling/Log-Based approach:
+  - Write information about intended changes to an intermediate buffer
+  - If journal full: Write changes logged in journal to actual storage locations
+  - Delete entry from journal.
