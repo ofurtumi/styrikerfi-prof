@@ -118,6 +118,73 @@ try {
             - Starvation: \
                 - Imagine that each philosopher always picks up their left fork first. Then each philosopher will wait forever for their right fork. This is starvation.\
 
+*Solution (not 100% correct but enough to get the feeling for how it is done):*
+
+```java
+class Philosopher extends Thread {
+    private final Semaphore leftFork;
+    private final Semaphore rightFork;
+
+    Philosopher(Semaphore leftFork, Semaphore rightFork) {
+        this.leftFork = leftFork;
+        this.rightFork = rightFork;
+    }
+
+    public void run() {
+        while (true) {
+            think();
+            pickUpForks();
+            eat();
+            putDownForks();
+        }
+    }
+
+    private void think() {
+        // Philosopher is thinking
+    }
+
+    private void pickUpForks() {
+        try {
+            leftFork.acquire();
+            rightFork.acquire();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void eat() {
+        // Philosopher is eating
+    }
+
+    private void putDownForks() {
+        leftFork.release();
+        rightFork.release();
+    }
+}
+
+public class DiningPhilosophers {
+    public static void main(String[] args) {
+        int numberOfPhilosophers = 5;
+        Semaphore[] forks = new Semaphore[numberOfPhilosophers];
+        Philosopher[] philosophers = new Philosopher[numberOfPhilosophers];
+
+        for (int i = 0; i < numberOfPhilosophers; i++) {
+            forks[i] = new Semaphore(1); // Each fork is a semaphore with 1 permit
+        }
+
+        for (int i = 0; i < numberOfPhilosophers; i++) {
+            Semaphore leftFork = forks[i];
+            Semaphore rightFork = forks[(i + 1) % numberOfPhilosophers];
+            philosophers[i] = new Philosopher(leftFork, rightFork);
+            philosophers[i].start();
+        }
+    }
+}
+
+
+
+```
+
     - Sleeping barber problem.
         - Imagine a hypothetical barbershop with one barber, one barber chair, and a waiting room with n chairs (n may be 0) for waiting customers. The following rules apply:
             - If there are no customers, the barber falls asleep in the chair
@@ -125,3 +192,38 @@ try {
             - When a customer arrives while the barber is cutting someone else's hair,he sit down in one of the chairs in the waiting room.
             - If there are no empty chairs, the customer leaves.
             - When the barber finishes cutting a customer's hair, they dismiss the customer and return to the barber chair to sleep if there are no other customers waiting.
+
+        ```java
+        Semaphore ME = new Semaphore(1); // Mutex for the waiting room
+        Semaphore barberSleep = new Semaphore(0); // Initially asleep
+        Semaphore barberChair = new Semaphore(0); // Mutex for the barber chair
+        int numberOfFreeWaitRoomSeats = N; // Number of free seats in the waiting room
+
+        // Barber:
+        void Barber (){
+            while (true) {
+                barberSleep.wait(); // Try to sleep
+                ME.wait(); // Enter the waiting room
+                numberOfFreeSeats++; // One chair becomes free
+                barberChair.signal(); // Invite customer into the chair
+                cutHairOfCustomerOnChair(); // Cut hair
+                ME.signal(); // Release the waiting room
+            }
+        }
+        
+        // Customer:
+        void Customer(){
+            ME.wait(); // Enter the waiting room
+            if (numberOfFreeWaitRoomSeats > 0) {
+                numberOfFreeWaitRoomSeats--; // Occupy a chair
+                barberSleep.signal(); // Wake up the barber if needed
+                ME.signal(); // Release the waiting room
+                barberChair.wait(); // Wait until invited
+                goToBarberChairGetHairCutLeave(); // Get haircut
+            } else {
+                ME.signal(); // Release the waiting room
+                leaveWithoutHaircut(); // No free chairs
+            }
+        }
+
+        ```
