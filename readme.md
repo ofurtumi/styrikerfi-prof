@@ -2,6 +2,8 @@
 
 Samasafn af efni úr TÖL401G - Stýrikerfi, áfanga við HÍ
 
+Takk fyrir önnina
+
 Sett saman af:
 
 - [@ofurtumi](http://github.com/ofurtumi)
